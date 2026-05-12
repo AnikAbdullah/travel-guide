@@ -79,7 +79,7 @@ CREATE TABLE cost_estimates (
     id INT AUTO_INCREMENT PRIMARY KEY,
     post_id INT NOT NULL,
     base_cost DECIMAL(10,2) NOT NULL,
-    currency VARCHAR(10) NOT NULL DEFAULT 'USD',
+    currency VARCHAR(10) NOT NULL DEFAULT 'BDT',
     last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
     CONSTRAINT fk_cost_estimates_post

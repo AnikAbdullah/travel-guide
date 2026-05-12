@@ -1,13 +1,8 @@
 <?php
 
-$host = "localhost";
-$dbname = "travel_guide";
-$username = "root";
-$password = "";
+$conn = mysqli_connect("localhost", "root", "", "travel_guide");
 
-try {
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $username, $password);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch (PDOException $e) {
-    die("Database connection failed.");
+if (!$conn) {
+    die("Database connection failed");
 }
+?>
