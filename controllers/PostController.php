@@ -1,34 +1,69 @@
 <?php
-require_once "/../config/db.php";
 
-class PostController {
-    public function browse() {
-        global $pdo;
-        $stmt = $pdo->prepare("SELECT * FROM posts WHERE status='approved'");
-        $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
+session_start();
 
-    public function search() {
-        global $pdo;
-        $q = $_GET['q'] ?? '';
-        $stmt = $pdo->prepare("SELECT * FROM posts WHERE status='approved' AND (title LIKE ? OR country LIKE ?)");
-        $stmt->execute(["%$q%", "%$q%"]);
-        echo json_encode($stmt->fetchAll(PDO::FETCH_ASSOC));
-    }
+require_once __DIR__ . "/../config/db.php";
+require_once __DIR__ . "/../models/Post.php";
 
-    public function filter() {
-        global $pdo;
-        $sql = "SELECT * FROM posts WHERE status='approved'";
-        $params = [];
+// Browse posts page.
+function browsePosts()
+{
+    global $conn;
 
-        if (!empty($_GET['country'])) { $sql .= " AND country=?"; $params[]=$_GET['country']; }
-        if (!empty($_GET['genre']))   { $sql .= " AND genre=?";   $params[]=$_GET['genre']; }
-        if (!empty($_GET['cost']))    { $sql .= " AND cost_level=?"; $params[]=$_GET['cost']; }
+    $posts = getApprovedPosts($conn);
 
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute($params);
-        echo json_encode($stmt->fetchAll(PDO::FETCH_ASSOC));
-    }
+    require_once __DIR__ . "/../views/posts/index.php";
 }
-?>
+
+// Post detail page.
+function viewPostDetail($id)
+{
+    global $conn;
+
+    $post = getPostById($conn, $id);
+
+    if (!$post || $post["status"] !== "approved") {
+        die("Post not found.");
+    }
+
+    $comments = getCommentsByPost($conn, $id);
+
+    $costEstimate = getCostEstimate($conn, $id);
+
+    require_once __DIR__ . "/../views/posts/detail.php";
+}
+
+// AJAX search.
+function searchPostsAjax()
+{
+    global $conn;
+
+    header("Content-Type: application/json");
+
+    $query = trim($_GET["q"] ?? "");
+
+    $posts = searchPosts($conn, $query);
+
+    echo json_encode($posts);
+}
+
+// AJAX filter.
+function filterPostsAjax()
+{
+    global $conn;
+
+    header("Content-Type: application/json");
+
+    $country = trim($_GET["country"] ?? "");
+    $genre = trim($_GET["genre"] ?? "");
+    $cost = trim($_GET["cost"] ?? "");
+
+    $posts = filterPosts(
+        $conn,
+        $country,
+        $genre,
+        $cost
+    );
+
+    echo json_encode($posts);
+}

@@ -1,29 +1,92 @@
 <?php
-require_once "/../config/db.php";
+
 session_start();
 
-class CommentController {
-    public function add() {
-        global $pdo;
-        $post_id = $_POST['post_id'];
-        $user_id = $_SESSION['user_id'];
-        $content = htmlspecialchars($_POST['content']);
+require_once __DIR__ . "/../config/db.php";
+require_once __DIR__ . "/../models/Post.php";
 
-        $stmt = $pdo->prepare("INSERT INTO comments (post_id, user_id, content) VALUES (?,?,?)");
-        $stmt->execute([$post_id, $user_id, $content]);
+// Add comment.
+function addCommentAjax()
+{
+    global $conn;
 
-        echo json_encode(["status"=>"success","message"=>"Comment added"]);
+    header("Content-Type: application/json");
+
+    // User validation.
+    if (
+        !isset($_SESSION["user_id"]) ||
+        $_SESSION["role"] !== "user"
+    ) {
+        echo json_encode([
+            "success" => false,
+            "message" => "Unauthorized."
+        ]);
+
+        exit;
     }
 
-    public function delete() {
-        global $pdo;
-        $id = $_POST['id'];
-        $user_id = $_SESSION['user_id'];
+    $postId = (int) ($_POST["post_id"] ?? 0);
 
-        $stmt = $pdo->prepare("DELETE FROM comments WHERE id=? AND user_id=?");
-        $stmt->execute([$id, $user_id]);
+    $content = trim($_POST["content"] ?? "");
 
-        echo json_encode(["status"=>"success","message"=>"Comment deleted"]);
+    // Validation.
+    if ($content === "") {
+        echo json_encode([
+            "success" => false,
+            "message" => "Comment cannot be empty."
+        ]);
+
+        exit;
     }
+
+    if (strlen($content) > 500) {
+        echo json_encode([
+            "success" => false,
+            "message" => "Comment too long."
+        ]);
+
+        exit;
+    }
+
+    // XSS protection.
+    $content = htmlspecialchars($content);
+
+    $success = addComment(
+        $conn,
+        $postId,
+        $_SESSION["user_id"],
+        $content
+    );
+
+    echo json_encode([
+        "success" => $success
+    ]);
 }
-?>
+
+// Delete own comment.
+function deleteCommentAjax()
+{
+    global $conn;
+
+    header("Content-Type: application/json");
+
+    if (!isset($_SESSION["user_id"])) {
+        echo json_encode([
+            "success" => false
+        ]);
+
+        exit;
+    }
+
+    $commentId = (int) ($_POST["comment_id"] ?? 0);
+
+    $success = deleteComment(
+        $conn,
+        $commentId,
+        $_SESSION["user_id"]
+    );
+
+    echo json_encode([
+        "success" => $success
+    ]);
+}
