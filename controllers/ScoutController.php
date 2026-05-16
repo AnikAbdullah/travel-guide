@@ -129,6 +129,7 @@ function handleCreatePostRequest($conn, $scout)
     }
 
     $errors = validatePostRequestForm($input);
+    $upload = ["path" => null, "error" => null];
 
     if (!$errors) {
         $upload = uploadPostRequestImage($_FILES["post_image"] ?? [], $scout["id"]);
@@ -154,7 +155,7 @@ function handleCreatePostRequest($conn, $scout)
     exit;
 }
 
-// Handle edit of a pending request.
+// Handle edit.
 function handleEditPostRequest($conn, $scout, $requestId)
 {
     $request = getRequestById($conn, $requestId, (int) $scout["id"]);
