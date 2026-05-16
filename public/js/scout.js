@@ -1,9 +1,10 @@
 // Show error.
 function showError(field, message) {
-  document.getElementById(field + "_error").innerHTML = message;
+  var el = document.getElementById(field + "_error");
+  if (el) el.innerHTML = message;
 }
 
-// Check form.
+// Validate form.
 function validateScoutForm() {
   var valid = true;
   var form = document.forms["postForm"];
@@ -13,7 +14,7 @@ function validateScoutForm() {
     country_representation: "Country representation is required.",
     genre: "Select a valid genre.",
     cost_level: "Select a valid cost level.",
-    travel_medium_info: "Travel medium information is required."
+    travel_medium_info: "Travel medium information is required.",
   };
 
   for (var field in required) {
@@ -31,12 +32,10 @@ function validateScoutForm() {
   }
 
   var image = form["post_image"];
-  if (image.files.length > 0) {
+  if (image && image.files.length > 0) {
     var file = image.files[0];
-    var extension = file.name.split(".").pop().toLowerCase();
-    var allowed = ["jpg", "jpeg", "png", "webp"];
-
-    if (allowed.indexOf(extension) === -1) {
+    var ext = file.name.split(".").pop().toLowerCase();
+    if (["jpg", "jpeg", "png", "webp"].indexOf(ext) === -1) {
       showError("post_image", "Only JPG, PNG, or WebP images are allowed.");
       valid = false;
     } else if (file.size > 2 * 1024 * 1024) {
@@ -45,9 +44,37 @@ function validateScoutForm() {
     } else {
       showError("post_image", "");
     }
-  } else {
+  } else if (image) {
     showError("post_image", "");
   }
 
   return valid;
+}
+
+// AJAX delete functionality.
+function confirmDelete(requestId) {
+  if (
+    !confirm(
+      "Are you sure you want to delete this request? This cannot be undone.",
+    )
+  ) {
+    return;
+  }
+
+  var xhttp = new XMLHttpRequest();
+  xhttp.open("post", "delete_request.php", true);
+  xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+  xhttp.send("request_id=" + requestId);
+
+  xhttp.onreadystatechange = function () {
+    if (this.readyState == 4 && this.status == 200) {
+      var data = JSON.parse(this.responseText);
+      if (data.success) {
+        alert(data.message);
+        location.reload();
+      } else {
+        alert(data.message || "Could not delete request.");
+      }
+    }
+  };
 }
