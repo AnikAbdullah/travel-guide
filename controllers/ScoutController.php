@@ -153,3 +153,54 @@ function handleCreatePostRequest($conn, $scout)
     header("Location: create_request.php");
     exit;
 }
+
+// Handle edit of a pending request.
+function handleEditPostRequest($conn, $scout, $requestId)
+{
+    $request = getRequestById($conn, $requestId, (int) $scout["id"]);
+
+    if (!$request || $request["status"] !== "pending") {
+        return ["request" => null, "input" => [], "errors" => []];
+    }
+
+    $input  = $request["post_data"];
+    $errors = [];
+
+    if ($_SERVER["REQUEST_METHOD"] !== "POST") {
+        return ["request" => $request, "input" => $input, "errors" => $errors];
+    }
+
+    $input = [
+        "title"                  => trim($_POST["title"] ?? ""),
+        "short_history"          => trim($_POST["short_history"] ?? ""),
+        "country_representation" => trim($_POST["country_representation"] ?? ""),
+        "genre"                  => trim($_POST["genre"] ?? ""),
+        "cost_level"             => trim($_POST["cost_level"] ?? ""),
+        "travel_medium_info"     => trim($_POST["travel_medium_info"] ?? ""),
+    ];
+    $errors = validatePostRequestForm($input);
+    $upload = ["path" => null, "error" => null];
+
+    if (!$errors) {
+        $upload = uploadPostRequestImage($_FILES["post_image"] ?? [], $scout["id"]);
+        if ($upload["error"]) {
+            $errors["image"] = $upload["error"];
+        }
+    }
+
+    if ($errors) {
+        return ["request" => $request, "input" => $input, "errors" => $errors];
+    }
+
+    $postData               = $input;
+    $postData["image_path"] = $upload["path"] ?? ($request["post_data"]["image_path"] ?? null);
+
+    if (!updatePostRequest($conn, $requestId, (int) $scout["id"], $postData)) {
+        $errors["form"] = "Request could not be updated. Please try again.";
+        return ["request" => $request, "input" => $input, "errors" => $errors];
+    }
+
+    $_SESSION["flash_success"] = "Request updated successfully.";
+    header("Location: my_requests.php");
+    exit;
+}
