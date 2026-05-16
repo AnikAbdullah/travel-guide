@@ -34,7 +34,7 @@ $commentCount = mysqli_fetch_assoc($commentQuery);
         <h2>Travel Guide</h2>
 
         <a href="dashboard.php">Dashboard</a>
-        <a href="#">User Management</a>
+        <a href="users.php">User Management</a>
         <a href="#">Post Requests</a>
         <a href="#">Posts Management</a>
         <a href="#">Comments Management</a>
