@@ -94,7 +94,7 @@ require_once "../layout/header.php";
                 <div class="request-actions">
                     <?php if ($status === "pending"): ?>
                         <a href="edit_request.php?id=<?= (int) $req["id"] ?>" class="btn-edit">Edit</a>
-                        <button class="btn-delete" onclick="confirmDelete(<?= (int) $req["id"] ?>, this.closest('.request-card'))">Delete</button>
+                        <button class="btn-delete" onclick="confirmDelete(<?= (int) $req["id"] ?>)">Delete</button>
                     <?php endif; ?>
                 </div>
             </div>
@@ -103,17 +103,6 @@ require_once "../layout/header.php";
     </div>
 <?php endif; ?>
 
-<div class="modal-overlay" id="deleteModal">
-    <div class="modal confirm-modal">
-        <span class="confirm-icon">🗑️</span>
-        <h3>Delete Request</h3>
-        <p>Are you sure you want to delete this request? This action cannot be undone.</p>
-        <div class="confirm-actions">
-            <button class="btn-cancel" onclick="closeDeleteModal()">Cancel</button>
-            <button class="btn-confirm-delete" id="confirmDeleteBtn">Delete</button>
-        </div>
-    </div>
-</div>
 
 <script src="../../public/js/scout.js"></script>
 
