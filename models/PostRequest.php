@@ -19,7 +19,7 @@ function createPostRequest($conn, $scoutId, $postData)
     return $success;
 }
 
-// Get all requests for a scout.
+// Get all requests.
 function getRequestsByScoutId($conn, $scoutId)
 {
     $sql = "SELECT id, post_data, status, requested_at FROM post_requests WHERE scout_id = ? ORDER BY requested_at DESC";
@@ -35,7 +35,7 @@ function getRequestsByScoutId($conn, $scoutId)
     return $rows;
 }
 
-// Get a single request (ownership enforced).
+// Get by id.
 function getRequestById($conn, $requestId, $scoutId)
 {
     $sql = "SELECT id, scout_id, post_data, status, requested_at FROM post_requests WHERE id = ? AND scout_id = ?";
@@ -50,7 +50,7 @@ function getRequestById($conn, $requestId, $scoutId)
     return $row;
 }
 
-// Update a pending request (ownership enforced).
+// Update request.
 function updatePostRequest($conn, $requestId, $scoutId, $postData)
 {
     $jsonData = json_encode($postData);
@@ -63,7 +63,7 @@ function updatePostRequest($conn, $requestId, $scoutId, $postData)
     return $affected > 0;
 }
 
-// Delete a pending request (ownership enforced).
+// Delete request.
 function deletePostRequest($conn, $requestId, $scoutId)
 {
     $sql = "DELETE FROM post_requests WHERE id = ? AND scout_id = ? AND status = 'pending'";
