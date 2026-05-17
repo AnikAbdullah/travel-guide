@@ -5,6 +5,7 @@ session_start();
 require_once __DIR__ . "/../config/db.php";
 require_once __DIR__ . "/../models/Scout.php";
 require_once __DIR__ . "/../models/PostRequest.php";
+require_once __DIR__ . "/../models/Post.php";
 
 // Scout auth.
 function scoutOnly()
@@ -152,6 +153,60 @@ function handleCreatePostRequest($conn, $scout)
 
     $_SESSION["flash_success"] = "Post request submitted for admin review.";
     header("Location: create_request.php");
+    exit;
+}
+
+// Handle change request.
+function handleRequestChanges($conn, $scout, $postId)
+{
+    $post = getApprovedPostByIdAndScout($conn, $postId, (int) $scout["id"]);
+
+    if (!$post) {
+        return ["post" => null, "input" => [], "errors" => []];
+    }
+
+    $input = [
+        "title"                  => $post["title"],
+        "short_history"          => $post["short_history"],
+        "country_representation" => $post["country"],
+        "genre"                  => $post["genre"],
+        "cost_level"             => $post["cost_level"],
+        "travel_medium_info"     => $post["travel_medium_info"],
+    ];
+
+    if ($_SERVER["REQUEST_METHOD"] !== "POST") {
+        return ["post" => $post, "input" => $input, "errors" => []];
+    }
+
+    $input = [
+        "title"                  => trim($_POST["title"] ?? ""),
+        "short_history"          => trim($_POST["short_history"] ?? ""),
+        "country_representation" => trim($_POST["country_representation"] ?? ""),
+        "genre"                  => trim($_POST["genre"] ?? ""),
+        "cost_level"             => trim($_POST["cost_level"] ?? ""),
+        "travel_medium_info"     => trim($_POST["travel_medium_info"] ?? ""),
+    ];
+    $errors = validatePostRequestForm($input);
+
+    if (!$errors) {
+        $upload = uploadPostRequestImage($_FILES["post_image"] ?? [], $scout["id"]);
+        if ($upload["error"]) {
+            $errors["image"] = $upload["error"];
+        }
+    }
+
+    if ($errors) {
+        return ["post" => $post, "input" => $input, "errors" => $errors];
+    }
+
+    $postData = $input + ["type" => "change_request", "original_post_id" => $postId, "image_path" => $upload["path"]];
+
+    if (!createPostRequest($conn, (int) $scout["id"], $postData)) {
+        return ["post" => $post, "input" => $input, "errors" => ["form" => "Change request could not be saved. Please try again."]];
+    }
+
+    $_SESSION["flash_success"] = "Change request submitted for admin review.";
+    header("Location: approved_posts.php");
     exit;
 }
 
