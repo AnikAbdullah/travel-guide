@@ -172,6 +172,44 @@ a { text-decoration: none; color: inherit; }
   gap: 10px;
 }
 
+.dash-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-top: 32px;
+}
+
+.dash-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 24px 20px;
+  text-align: center;
+}
+
+.dash-card .icon {
+  font-size: 36px;
+  display: block;
+  margin-bottom: 12px;
+}
+
+.dash-card h3 {
+  font-size: 16px;
+  color: #1a2b32;
+  margin-bottom: 6px;
+}
+
+.dash-card p {
+  font-size: 13px;
+  color: #6b7280;
+  margin-bottom: 16px;
+  line-height: 1.6;
+}
+
+@media screen and (max-width: 600px) {
+  .dash-cards { grid-template-columns: 1fr; }
+}
+
 /* ============================================================
    BUTTONS
 ============================================================ */
