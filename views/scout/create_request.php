@@ -64,6 +64,7 @@ require_once "../layout/header.php";
     <?php endif; ?>
 
     <form name="postForm" method="POST" action="create_request.php" enctype="multipart/form-data" onsubmit="return validateScoutForm()">
+        <input type="hidden" name="csrf_token" value="<?= e(csrfToken()) ?>">
         <!-- Place information -->
         <div class="request-form-section">
             <h3 class="request-section-title">Place Information</h3>

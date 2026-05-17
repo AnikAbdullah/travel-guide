@@ -59,6 +59,7 @@ require_once "../layout/header.php";
     <?php endif; ?>
 
     <form name="postForm" method="POST" action="request_changes.php" enctype="multipart/form-data" onsubmit="return validateScoutForm()">
+        <input type="hidden" name="csrf_token" value="<?= e(csrfToken()) ?>">
         <input type="hidden" name="post_id" value="<?= (int) $post["id"] ?>">
 
         <div class="request-form-section">

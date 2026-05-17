@@ -104,6 +104,7 @@ require_once "../layout/header.php";
 <?php endif; ?>
 
 
+<script>window.CSRF_TOKEN = <?= json_encode(csrfToken()) ?>;</script>
 <script src="../../public/js/scout.js"></script>
 
 <?php require_once "../layout/footer.php"; ?>
