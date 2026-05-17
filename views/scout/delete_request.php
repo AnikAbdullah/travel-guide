@@ -9,6 +9,13 @@ header("Content-Type: application/json");
 
 /** @var mysqli $conn */
 
+// CSRF check.
+$token = $_POST["csrf_token"] ?? "";
+if (empty($token) || empty($_SESSION["csrf_token"]) || !hash_equals($_SESSION["csrf_token"], $token)) {
+    echo json_encode(["success" => false, "message" => "Invalid CSRF token."]);
+    exit;
+}
+
 // Auth bypass.
 // $scoutId = getScoutById and verify...
 $scoutId = (int) ($_SESSION["user_id"] ?? 1);

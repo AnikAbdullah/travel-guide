@@ -7,6 +7,22 @@ require_once __DIR__ . "/../models/Scout.php";
 require_once __DIR__ . "/../models/PostRequest.php";
 require_once __DIR__ . "/../models/Post.php";
 
+// CSRF helpers.
+function csrfToken()
+{
+    if (empty($_SESSION["csrf_token"])) {
+        $_SESSION["csrf_token"] = bin2hex(random_bytes(32));
+    }
+    return $_SESSION["csrf_token"];
+}
+
+function checkCsrf($token)
+{
+    return !empty($token)
+        && !empty($_SESSION["csrf_token"])
+        && hash_equals($_SESSION["csrf_token"], $token);
+}
+
 // Scout auth.
 function scoutOnly()
 {
@@ -129,6 +145,11 @@ function handleCreatePostRequest($conn, $scout)
         return ["input" => $input, "errors" => $errors];
     }
 
+    if (!checkCsrf($_POST["csrf_token"] ?? "")) {
+        http_response_code(400);
+        exit("Invalid CSRF token.");
+    }
+
     $errors = validatePostRequestForm($input);
     $upload = ["path" => null, "error" => null];
 
@@ -178,6 +199,11 @@ function handleRequestChanges($conn, $scout, $postId)
         return ["post" => $post, "input" => $input, "errors" => []];
     }
 
+    if (!checkCsrf($_POST["csrf_token"] ?? "")) {
+        http_response_code(400);
+        exit("Invalid CSRF token.");
+    }
+
     $input = [
         "title"                  => trim($_POST["title"] ?? ""),
         "short_history"          => trim($_POST["short_history"] ?? ""),
@@ -224,6 +250,11 @@ function handleEditPostRequest($conn, $scout, $requestId)
 
     if ($_SERVER["REQUEST_METHOD"] !== "POST") {
         return ["request" => $request, "input" => $input, "errors" => $errors];
+    }
+
+    if (!checkCsrf($_POST["csrf_token"] ?? "")) {
+        http_response_code(400);
+        exit("Invalid CSRF token.");
     }
 
     $input = [

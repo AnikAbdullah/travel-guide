@@ -64,7 +64,10 @@ function confirmDelete(requestId) {
   var xhttp = new XMLHttpRequest();
   xhttp.open("post", "delete_request.php", true);
   xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-  xhttp.send("request_id=" + requestId);
+  xhttp.send(
+    "request_id=" + requestId +
+    "&csrf_token=" + encodeURIComponent(window.CSRF_TOKEN || ""),
+  );
 
   xhttp.onreadystatechange = function () {
     if (this.readyState == 4 && this.status == 200) {
