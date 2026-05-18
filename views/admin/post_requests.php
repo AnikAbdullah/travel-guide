@@ -27,7 +27,7 @@ $requestQuery = mysqli_query($conn, "SELECT * FROM post_requests");
         <a href="users.php">User Management</a>
         <a href="post_requests.php">Post Requests</a>
         <a href="posts.php">Posts Management</a>
-        <a href="#">Comments Management</a>
+        <a href="comments.php">Comments Management</a>
 
     </div>
 
