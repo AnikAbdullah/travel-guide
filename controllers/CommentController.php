@@ -26,3 +26,15 @@ function getPostComments($postId)
         $postId
     );
 }
+
+// Remove comment.
+function removeComment($commentId, $userId)
+{
+    global $conn;
+
+    return deleteComment(
+        $conn,
+        $commentId,
+        $userId
+    );
+}

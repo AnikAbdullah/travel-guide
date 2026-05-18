@@ -138,7 +138,7 @@ $comments = getPostComments($postId);
 
         <?php foreach ($comments as $comment): ?>
 
-            <div class="comment-card">
+            <div class="comment-card" id="comment-<?= $comment["id"]?>">
 
                 <h4>
                     <?= e($comment["name"]) ?>
@@ -147,6 +147,16 @@ $comments = getPostComments($postId);
                 <p>
                     <?= e($comment["comment"]) ?>
                 </p>
+
+            <?php if ($comment["user_id"] == $userId): ?>
+
+                <button
+                    onclick="deleteComment(<?= $comment["id"] ?>)">
+                    Delete
+                </button>
+
+            <?php endif; 
+            ?>
 
                 <small>
                     <?= e($comment["created_at"]) ?>
@@ -162,10 +172,41 @@ $comments = getPostComments($postId);
 
 </div>
 
-    </div>
+    <hr>
+
+    <div class="cost-estimator">
+
+        <h2>Travel Cost Estimator</h2>
+
+        <input type="number" id="days" placeholder="Number of days">
+
+    <br><br>
+
+    <input type="number" id="hotel" placeholder="Hotel cost per day">
+
+    <br><br>
+
+    <input type="number" id="food" placeholder="Food cost per day">
+
+    <br><br>
+
+    <input type="number" id="transport" placeholder="Transport cost">
+
+    <br><br>
+
+    <button onclick="calculateCost()">
+        Calculate
+    </button>
+
+    <h3 id="totalCost"></h3>
 
 </div>
 
+    </div>
+
+</div>
+<script src="../../public/js/comments.js"></script>
+<script src="../../public/js/cost.js"></script>
 </body>
 
 </html>

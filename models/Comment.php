@@ -47,3 +47,24 @@ function getCommentsByPostId($conn, $postId)
 
     return $comments;
 }
+
+// Delete comment.
+function deleteComment($conn, $commentId, $userId)
+{
+    $sql = "DELETE FROM comments
+            WHERE id = ?
+            AND user_id = ?";
+
+    $stmt = mysqli_prepare($conn, $sql);
+
+    mysqli_stmt_bind_param(
+        $stmt,
+        "ii",
+        $commentId,
+        $userId
+    );
+
+    mysqli_stmt_execute($stmt);
+
+    return mysqli_affected_rows($conn) > 0;
+}
