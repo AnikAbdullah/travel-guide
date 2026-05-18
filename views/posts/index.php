@@ -29,6 +29,8 @@ function e($value)
 <div class="posts-container">
 
     <h1>Travel Posts</h1>
+    <input type="text" id="search" placeholder="Search posts..."
+    onkeyup="searchPosts()">
 
     <?php if (empty($posts)): ?>
 
@@ -36,7 +38,7 @@ function e($value)
 
     <?php else: ?>
 
-        <div class="posts-grid">
+        <div class="posts-grid" id="postArea">
 
             <?php foreach ($posts as $post): ?>
 
@@ -82,7 +84,7 @@ function e($value)
     <?php endif; ?>
 
 </div>
-
+    <script src="../../public/js/search.js"></script>
 </body>
 
 </html>

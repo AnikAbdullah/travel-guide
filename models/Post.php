@@ -38,3 +38,41 @@ function getPostById($conn, $id)
 
     return mysqli_fetch_assoc($result);
 }
+
+// Search approved posts.
+function searchPosts($conn, $keyword)
+{
+    $search = "%" . $keyword . "%";
+
+    $sql = "SELECT *
+            FROM posts
+            WHERE status = 'approved'
+            AND (
+                title LIKE ?
+                OR genre LIKE ?
+                OR country_representation LIKE ?
+            )
+            ORDER BY created_at DESC";
+
+    $stmt = mysqli_prepare($conn, $sql);
+
+    mysqli_stmt_bind_param(
+        $stmt,
+        "sss",
+        $search,
+        $search,
+        $search
+    );
+
+    mysqli_stmt_execute($stmt);
+
+    $result = mysqli_stmt_get_result($stmt);
+
+    $posts = [];
+
+    while ($row = mysqli_fetch_assoc($result)) {
+        $posts[] = $row;
+    }
+
+    return $posts;
+}
