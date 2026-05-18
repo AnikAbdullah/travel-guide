@@ -16,12 +16,7 @@ function e($value)
 $currentPage = "approved";
 $pageTitle   = "Approved Posts";
 
-// Auth bypass.
-// $scout = scoutOnly();
-$scout = [
-    "id"   => $_SESSION["user_id"] ?? 1,
-    "name" => $_SESSION["name"] ?? "Test Scout",
-];
+$scout = scoutOnly();
 
 $posts          = getApprovedPostsByScoutId($conn, (int) $scout["id"]);
 $successMessage = $_SESSION["flash_success"] ?? "";

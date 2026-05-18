@@ -16,12 +16,7 @@ function e($value)
 $currentPage = "approved";
 $pageTitle   = "Request Changes";
 
-// Auth bypass.
-// $scout = scoutOnly();
-$scout = [
-    "id"   => $_SESSION["user_id"] ?? 1,
-    "name" => $_SESSION["name"] ?? "Test Scout",
-];
+$scout = scoutOnly();
 
 $postId = (int) ($_GET["post_id"] ?? $_POST["post_id"] ?? 0);
 $result = handleRequestChanges($conn, $scout, $postId);

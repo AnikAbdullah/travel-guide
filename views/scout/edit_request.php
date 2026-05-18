@@ -16,12 +16,7 @@ function e($value)
 $currentPage = "requests";
 $pageTitle   = "Edit Request";
 
-// Auth bypass.
-// $scout = scoutOnly();
-$scout = [
-    "id"   => $_SESSION["user_id"] ?? 1,
-    "name" => $_SESSION["name"] ?? "Test Scout",
-];
+$scout = scoutOnly();
 
 $requestId = (int) ($_GET["id"] ?? $_POST["request_id"] ?? 0);
 $result    = handleEditPostRequest($conn, $scout, $requestId);
