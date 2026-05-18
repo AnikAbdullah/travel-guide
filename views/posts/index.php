@@ -1,105 +1,87 @@
+<?php
+
+require_once "../../controllers/PostController.php";
+
+$posts = browsePosts();
+
+function e($value)
+{
+    return htmlspecialchars($value ?? "");
+}
+
+?>
+
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
 
-    <title>Browse Posts</title>
+    <meta charset="UTF-8">
 
-    <link rel="stylesheet"
-          href="../../public/css/style.css">
+    <title>Travel Posts</title>
+
+    <link rel="stylesheet" href="../../public/css/style.css">
 
 </head>
 
 <body>
 
-<h1>Travel Posts</h1>
+<div class="posts-container">
 
-<!-- Search -->
-<input type="text"
-       id="searchText"
-       placeholder="Search posts..."
-       onkeyup="searchPosts()">
+    <h1>Travel Posts</h1>
 
-<br><br>
+    <?php if (empty($posts)): ?>
 
-<!-- Filter -->
-<select id="country" onchange="filterPosts()">
+        <p>No approved posts found.</p>
 
-    <option value="">All Countries</option>
+    <?php else: ?>
 
-    <option value="Bangladesh">Bangladesh</option>
+        <div class="posts-grid">
 
-    <option value="Japan">Japan</option>
+            <?php foreach ($posts as $post): ?>
 
-</select>
+                <div class="post-card">
 
-<select id="genre" onchange="filterPosts()">
+                    <?php if (!empty($post["image_path"])): ?>
 
-    <option value="">All Genres</option>
+                        <img
+                            src="../../<?= e($post["image_path"]) ?>"
+                            class="post-image"
+                            alt="Post Image"
+                        >
 
-    <option value="beach">Beach</option>
+                    <?php endif; ?>
 
-    <option value="mountain">Mountain</option>
+                    <h2>
+                        <?= e($post["title"]) ?>
+                    </h2>
 
-    <option value="city">City</option>
+                    <p>
+                        <strong>Genre:</strong>
+                        <?= e($post["genre"]) ?>
+                    </p>
 
-</select>
+                    <p>
+                        <strong>Cost:</strong>
+                        <?= e($post["cost_level"]) ?>
+                    </p>
 
-<select id="cost" onchange="filterPosts()">
+                    <a
+                        href="detail.php?id=<?= $post["id"] ?>"
+                        class="view-btn"
+                    >
+                        View Details
+                    </a>
 
-    <option value="">All Costs</option>
+                </div>
 
-    <option value="low">Low</option>
+            <?php endforeach; ?>
 
-    <option value="medium">Medium</option>
+        </div>
 
-    <option value="high">High</option>
-
-</select>
-
-<hr>
-
-<div id="postData">
-
-<?php foreach ($posts as $post): ?>
-
-<div class="card">
-
-    <h2>
-        <?= htmlspecialchars($post["title"]) ?>
-    </h2>
-
-    <p>
-        <?= htmlspecialchars($post["country"]) ?>
-    </p>
-
-    <p>
-        <?= htmlspecialchars($post["genre"]) ?>
-    </p>
-
-    <p>
-        <?= htmlspecialchars($post["cost_level"]) ?>
-    </p>
-
-    <p>
-        <?= htmlspecialchars(substr($post["short_history"], 0, 100)) ?>
-    </p>
-
-    <a href="../../index.php?action=details&id=<?= $post["id"] ?>">
-        Read More
-    </a>
+    <?php endif; ?>
 
 </div>
-
-<hr>
-
-<?php endforeach; ?>
-
-</div>
-
-<script src="../../public/js/search.js"></script>
-
-<script src="../../public/js/filter.js"></script>
 
 </body>
 
