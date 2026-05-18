@@ -19,3 +19,11 @@ function getPostDetails($id)
 
     return getPostById($conn, $id);
 }
+
+// Search travel posts.
+function searchTravelPosts($keyword)
+{
+    global $conn;
+
+    return searchPosts($conn, $keyword);
+}
