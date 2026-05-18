@@ -13,6 +13,7 @@ require __DIR__ . '/../partials/header.php';
   <?php endif; ?>
 
   <form method="post" action="<?= e($baseUrl) ?>/register" id="registerForm" novalidate>
+    <?= csrf_field() ?>
     <div class="form-group">
       <label for="name">Full Name</label>
       <input type="text" id="name" name="name" value="<?= e($old['name']) ?>" required>

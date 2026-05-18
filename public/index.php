@@ -73,8 +73,30 @@ switch (true) {
         $wishlist->remove();
         break;
 
+    // ── Stub routes for other tasks (will be implemented by Task 2/3/4) ──────
+    case preg_match('#^/posts(/\d+)?$#', $route) && $method === 'GET':
+        // Task 4 – Browse/detail posts. Redirect to home until Task 4 is merged.
+        if (is_verified_user()) {
+            require __DIR__ . '/../views/home/index.php';
+        } else {
+            redirect('/home');
+        }
+        break;
+
+    case preg_match('#^/scout#', $route):
+        // Task 2 – Scout pages.
+        http_response_code(404);
+        require __DIR__ . '/../views/errors/404.php';
+        break;
+
+    case preg_match('#^/admin#', $route):
+        // Task 3 – Admin pages.
+        http_response_code(404);
+        require __DIR__ . '/../views/errors/404.php';
+        break;
+
     default:
         http_response_code(404);
-        echo 'Page not found.';
+        require __DIR__ . '/../views/errors/404.php';
         break;
 }

@@ -54,9 +54,6 @@ class WishlistController
 
         $postId = filter_input(INPUT_POST, 'post_id', FILTER_VALIDATE_INT);
         if (!$postId) {
-            $postId = filter_input(INPUT_GET, 'post_id', FILTER_VALIDATE_INT);
-        }
-        if (!$postId) {
             json_response(['success' => false, 'message' => 'Invalid post ID.'], 400);
         }
 

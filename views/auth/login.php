@@ -22,6 +22,7 @@ require __DIR__ . '/../partials/header.php';
   <?php endif; ?>
 
   <form method="post" action="<?= e($baseUrl) ?>/login" id="loginForm" novalidate>
+    <?= csrf_field() ?>
     <div class="form-group">
       <label for="email">Email</label>
       <input type="email" id="email" name="email" value="<?= e($old['email']) ?>" required>

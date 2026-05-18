@@ -17,6 +17,7 @@ $uploadUrl = rtrim($config['app']['upload_url'], '/');
   <?php endif; ?>
 
   <form method="post" action="<?= e($baseUrl) ?>/profile" enctype="multipart/form-data" id="profileForm" novalidate>
+    <?= csrf_field() ?>
     <div class="profile-header">
       <div class="avatar">
         <?php if (!empty($user['profile_picture'])): ?>

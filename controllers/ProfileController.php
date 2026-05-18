@@ -31,6 +31,7 @@ class ProfileController
     public function update(): void
     {
         require_login();
+        verify_csrf();
 
         $userModel = new User($this->pdo);
         $user = $userModel->findById((int) $_SESSION['user_id']);

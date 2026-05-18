@@ -30,6 +30,7 @@ class AuthController
             redirect('/home');
         }
 
+        verify_csrf();
         $errors = [];
         $old = [
             'name' => trim($_POST['name'] ?? ''),
@@ -105,6 +106,7 @@ class AuthController
             redirect('/home');
         }
 
+        verify_csrf();
         $errors = [];
         $old = ['email' => trim($_POST['email'] ?? '')];
         $password = $_POST['password'] ?? '';
