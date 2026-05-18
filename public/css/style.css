@@ -189,3 +189,6 @@ form button:hover{
 .add-btn:hover{
     background-color: #219150;
 }
+.action-buttons{
+    white-space: nowrap;
+}

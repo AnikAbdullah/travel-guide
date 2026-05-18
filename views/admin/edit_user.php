@@ -58,8 +58,8 @@ if(isset($_POST['update'])){
 
         <a href="dashboard.php">Dashboard</a>
         <a href="users.php">User Management</a>
-        <a href="#">Post Requests</a>
-        <a href="#">Posts Management</a>
+        <a href="post_requests.php">Post Requests</a>
+        <a href="posts.php">Posts Management</a>
         <a href="#">Comments Management</a>
 
     </div>
