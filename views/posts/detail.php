@@ -1,21 +1,43 @@
 <?php
 
 require_once "../../controllers/PostController.php";
+require_once "../../controllers/CommentController.php";
 
 $postId = (int) ($_GET["id"] ?? 0);
-
 $post = getPostDetails($postId);
-
-if (!$post) {
-    die("Post not found.");
-}
 
 function e($value)
 {
     return htmlspecialchars($value ?? "");
 }
 
+if (!$post) {
+    die("Post not found.");
+}
+// Temporary login bypass.
+$userId = $_SESSION["user_id"] ?? 1;
+
+// Add comment.
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+
+    $comment = trim($_POST["comment"] ?? "");
+
+    if ($comment !== "") {
+
+        saveComment(
+            $postId,
+            $userId,
+            $comment
+        );
+    }
+}
+
+// Load comments.
+$comments = getPostComments($postId);
+
+
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -80,6 +102,65 @@ function e($value)
             <strong>Travel Medium Info:</strong>
             <?= e($post["travel_medium_info"]) ?>
         </p>
+        
+        <hr>
+
+<div class="comments-section">
+
+    <h2>Comments</h2>
+
+    <!-- Comment form -->
+    <form method="POST">
+
+        <textarea
+            name="comment"
+            rows="4"
+            placeholder="Write your comment..."
+            required
+        ></textarea>
+
+        <br><br>
+
+        <button type="submit">
+            Add Comment
+        </button>
+
+    </form>
+
+    <br>
+
+    <!-- Comments list -->
+    <?php if (empty($comments)): ?>
+
+        <p>No comments yet.</p>
+
+    <?php else: ?>
+
+        <?php foreach ($comments as $comment): ?>
+
+            <div class="comment-card">
+
+                <h4>
+                    <?= e($comment["name"]) ?>
+                </h4>
+
+                <p>
+                    <?= e($comment["comment"]) ?>
+                </p>
+
+                <small>
+                    <?= e($comment["created_at"]) ?>
+                </small>
+
+            </div>
+
+            <br>
+
+        <?php endforeach; ?>
+
+    <?php endif; ?>
+
+</div>
 
     </div>
 
