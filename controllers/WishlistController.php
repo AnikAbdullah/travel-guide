@@ -2,39 +2,16 @@
 
 session_start();
 
-require_once '../config/database.php';
-require_once '../models/Wishlist.php';
+require_once __DIR__ . "/../config/db.php";
+require_once __DIR__ . "/../models/Wishlist.php";
+require_once __DIR__ . "/../helpers/auth.php";
 
-$db = (new Database())->connect();
+// Get user wishlist.
+function handleWishlistPage($conn)
+{
+    requireVerifiedGeneralUser();
 
-$wishlist = new Wishlist($db);
+    $userId = (int) $_SESSION["user_id"];
 
-if(isset($_POST['add'])){
-
-    $post_id = $_POST['post_id'];
-
-    $wishlist->addWishlist(
-        $_SESSION['user_id'],
-        $post_id
-    );
-
-    header(
-        "Location: ../views/home.php"
-    );
+    return getWishlistByUserId($conn, $userId);
 }
-
-if(isset($_POST['remove'])){
-
-    $post_id = $_POST['post_id'];
-
-    $wishlist->removeWishlist(
-        $_SESSION['user_id'],
-        $post_id
-    );
-
-    header(
-        "Location: ../views/wishlist/wishlist.php"
-    );
-}
-
-?>
