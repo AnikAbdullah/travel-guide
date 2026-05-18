@@ -1,53 +1,44 @@
-(function () {
-  "use strict";
+function addWishlist(postId){
 
-  // Use the base URL injected by PHP via a meta tag, or fall back to empty string.
-  var basePath = (document.querySelector('meta[name="base-url"]') || {}).content || "";
+    fetch('../../api/wishlist_add.php',{
 
-  function showAlert(message, type) {
-    var alertBox = document.getElementById("wishlistAlert");
-    if (!alertBox) {
-      window.alert(message);
-      return;
-    }
-    alertBox.textContent = message;
-    alertBox.className = "alert alert-" + type;
-    alertBox.classList.remove("hidden");
-    // Auto-hide after 4 seconds
-    setTimeout(function () {
-      alertBox.classList.add("hidden");
-    }, 4000);
-  }
+        method:'POST',
 
-  function requestJson(url, method, postId) {
-    var body = new URLSearchParams();
-    body.append("post_id", String(postId));
+        headers:{
+            'Content-Type':
+            'application/x-www-form-urlencoded'
+        },
 
-    return fetch(url, {
-      method: "POST", // always POST; DELETE is simulated via POST for broad server support
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-        "X-Requested-With": "XMLHttpRequest"
-      },
-      body: body.toString()
-    }).then(function (response) {
-      return response.json().then(function (data) {
-        return { ok: response.ok, status: response.status, data: data };
-      });
+        body:'post_id='+postId
+    })
+    .then(response => response.text())
+    .then(data => {
+
+        alert(data);
     });
-  }
+}
 
-  // ── Add to wishlist ──────────────────────────────────────────────────────────
-  document.querySelectorAll(".wishlist-add-btn").forEach(function (button) {
-    button.addEventListener("click", function () {
-      var postId = button.getAttribute("data-post-id");
-      if (!postId) return;
-      button.disabled = true;
+function removeWishlist(postId){
 
-      requestJson(basePath + "/api/wishlist/add", "POST", postId)
-        .then(function (result) {
-          if (result.ok) {
-            button.textContent = "✓ Added";
+    fetch('../../api/wishlist_remove.php',{
+
+        method:'POST',
+
+        headers:{
+            'Content-Type':
+            'application/x-www-form-urlencoded'
+        },
+
+        body:'post_id='+postId
+    })
+    .then(response => response.text())
+    .then(data => {
+
+        alert(data);
+
+        location.reload();
+    });
+}
             button.classList.add("btn-added");
             showAlert(result.data.message || "Added to wishlist.", "success");
           } else {

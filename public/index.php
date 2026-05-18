@@ -72,26 +72,59 @@ switch (true) {
         $wishlist->remove();
         break;
 
-    // ── Stub routes for other tasks (will be implemented by Task 2/3/4) ──────
-    case preg_match('#^/posts(/\d+)?$#', $route) && $method === 'GET':
-        // Task 4 – Browse/detail posts. Redirect to home until Task 4 is merged.
+    // ── Task 2 – Scout (loads ScoutController if merged) ─────────────────────
+    case preg_match('#^/scout#', $route):
+        $scoutController = __DIR__ . '/../controllers/ScoutController.php';
+        if (file_exists($scoutController)) {
+            require_once $scoutController;
+            $scout = new ScoutController($conn);
+            // Route to the right scout method
+            if ($route === '/scout/requests' && $method === 'GET')        { $scout->index();       break; }
+            if ($route === '/scout/requests/create' && $method === 'GET') { $scout->create();      break; }
+            if ($route === '/scout/requests/create' && $method === 'POST'){ $scout->store();       break; }
+            if (preg_match('#^/scout/requests/(\d+)/edit$#', $route, $m) && $method === 'GET')  { $scout->edit((int)$m[1]);   break; }
+            if (preg_match('#^/scout/requests/(\d+)/edit$#', $route, $m) && $method === 'POST') { $scout->update((int)$m[1]); break; }
+            if (preg_match('#^/scout/requests/(\d+)/delete$#', $route, $m)) { $scout->destroy((int)$m[1]); break; }
+            if ($route === '/scout/approved' && $method === 'GET')        { $scout->approved();    break; }
+        }
+        http_response_code(404);
+        require __DIR__ . '/../views/errors/404.php';
+        break;
+
+    // ── Task 3 – Admin (loads AdminController if merged) ─────────────────────
+    case preg_match('#^/admin#', $route):
+        $adminController = __DIR__ . '/../controllers/AdminController.php';
+        if (file_exists($adminController)) {
+            require_once $adminController;
+            $admin = new AdminController($conn);
+            if ($route === '/admin'                && $method === 'GET')  { $admin->index();                    break; }
+            if ($route === '/admin/users'          && $method === 'GET')  { $admin->users();                    break; }
+            if ($route === '/admin/posts'          && $method === 'GET')  { $admin->posts();                    break; }
+            if ($route === '/admin/comments'       && $method === 'GET')  { $admin->comments();                 break; }
+            if (preg_match('#^/admin/users/(\d+)#', $route, $m))          { $admin->userAction((int)$m[1]);     break; }
+            if (preg_match('#^/admin/posts/(\d+)#', $route, $m))          { $admin->postAction((int)$m[1]);     break; }
+            if (preg_match('#^/admin/comments/(\d+)#', $route, $m))       { $admin->commentAction((int)$m[1]);  break; }
+        }
+        http_response_code(404);
+        require __DIR__ . '/../views/errors/404.php';
+        break;
+
+    // ── Task 4 – Browse posts (loads PostController if merged) ───────────────
+    case preg_match('#^/posts#', $route) && $method === 'GET':
+        $postController = __DIR__ . '/../controllers/PostController.php';
+        if (file_exists($postController)) {
+            require_once $postController;
+            $postCtrl = new PostController($conn);
+            if (preg_match('#^/posts/(\d+)$#', $route, $m)) { $postCtrl->show((int)$m[1]); break; }
+            $postCtrl->index();
+            break;
+        }
+        // Fallback until Task 4 is merged
         if (is_verified_user()) {
             require __DIR__ . '/../views/home/index.php';
         } else {
             redirect('/home');
         }
-        break;
-
-    case preg_match('#^/scout#', $route):
-        // Task 2 – Scout pages.
-        http_response_code(404);
-        require __DIR__ . '/../views/errors/404.php';
-        break;
-
-    case preg_match('#^/admin#', $route):
-        // Task 3 – Admin pages.
-        http_response_code(404);
-        require __DIR__ . '/../views/errors/404.php';
         break;
 
     default:

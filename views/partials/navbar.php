@@ -1,53 +1,22 @@
-<?php
-$config  = app_config();
-$baseUrl = rtrim($config['app']['base_url'], '/');
-$role    = current_user_role();
-$verified = is_verified_user();
-?>
-<nav class="navbar">
-  <div class="container navbar-inner">
+<div class="navbar">
 
-    <a class="brand" href="<?= e($baseUrl) ?>/home">
-      <div class="brand-icon">✈</div>
-      Travel<span class="brand-dot">Guide</span>
-    </a>
+<a href="../home.php">
+Home
+</a>
 
-    <button class="nav-toggle" id="navToggle" aria-label="Toggle menu" aria-expanded="false">&#9776;</button>
+<a href="../profile/profile.php">
+Profile
+</a>
 
-    <ul class="nav-links" id="navLinks">
-      <li><a href="<?= e($baseUrl) ?>/home">Home</a></li>
+<a href="../wishlist/wishlist.php">
+Wishlist
+</a>
 
-      <?php if (is_logged_in()): ?>
+<a href="../../controllers/LogoutController.php">
+Logout
+</a>
 
-        <?php if ($verified): ?>
-          <li><a href="<?= e($baseUrl) ?>/posts">&#127758; Browse</a></li>
-        <?php endif; ?>
-
-        <?php if ($verified && $role === 'user'): ?>
-          <li><a href="<?= e($baseUrl) ?>/wishlist">&#9825; Wishlist</a></li>
-        <?php endif; ?>
-
-        <?php if ($role === 'scout' && $verified): ?>
-          <li><a href="<?= e($baseUrl) ?>/scout/requests">My Requests</a></li>
-          <li><span class="nav-badge scout">Scout</span></li>
-        <?php endif; ?>
-
-        <?php if ($role === 'admin'): ?>
-          <li><a href="<?= e($baseUrl) ?>/admin">Dashboard</a></li>
-          <li><span class="nav-badge admin">Admin</span></li>
-        <?php endif; ?>
-
-        <li><a href="<?= e($baseUrl) ?>/profile">&#128100; Profile</a></li>
-        <li><a href="<?= e($baseUrl) ?>/logout" class="nav-logout">Logout</a></li>
-
-      <?php else: ?>
-        <li><a href="<?= e($baseUrl) ?>/login">Sign In</a></li>
-        <li><a class="btn btn-small" href="<?= e($baseUrl) ?>/register">Register Free</a></li>
-      <?php endif; ?>
-    </ul>
-
-  </div>
-</nav>
+</div>
 
 <script>
 (function(){
