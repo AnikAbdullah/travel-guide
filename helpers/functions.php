@@ -171,63 +171,54 @@ function handle_profile_upload(array $file, string $uploadDir): array
     return ['success' => true, 'filename' => $filename];
 }
 
-function restore_remember_me(PDO $pdo): void
+function restore_remember_me($conn): void
 {
-    if (is_logged_in()) {
-        return;
-    }
+    if (is_logged_in()) return;
 
-    $config = app_config()['app'];
+    $config     = app_config()['app'];
     $cookieName = $config['remember_cookie'];
-
-    if (empty($_COOKIE[$cookieName])) {
-        return;
-    }
+    if (empty($_COOKIE[$cookieName])) return;
 
     $parts = explode(':', $_COOKIE[$cookieName], 2);
-    if (count($parts) !== 2) {
-        return;
-    }
+    if (count($parts) !== 2) return;
 
     [$selector, $validator] = $parts;
-    $stmt = $pdo->prepare('SELECT id, name, role, is_verified, remember_token FROM users WHERE remember_token LIKE :selector LIMIT 1');
-    $stmt->execute(['selector' => $selector . ':%']);
-    $user = $stmt->fetch();
+    $like  = $selector . ':%';
+    $stmt  = mysqli_prepare($conn,
+        'SELECT id, name, role, is_verified, remember_token FROM users WHERE remember_token LIKE ? LIMIT 1'
+    );
+    mysqli_stmt_bind_param($stmt, 's', $like);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+    $user   = mysqli_fetch_assoc($result);
+    mysqli_stmt_close($stmt);
 
-    if (!$user || empty($user['remember_token'])) {
-        return;
-    }
+    if (!$user || empty($user['remember_token'])) return;
 
     $stored = explode(':', $user['remember_token'], 2);
-    if (count($stored) !== 2 || !hash_equals($stored[0], $selector)) {
-        return;
-    }
+    if (count($stored) !== 2 || !hash_equals($stored[0], $selector)) return;
+    if (!password_verify($validator, $stored[1])) return;
 
-    if (!password_verify($validator, $stored[1])) {
-        return;
-    }
-
-    $_SESSION['user_id'] = (int) $user['id'];
-    $_SESSION['name'] = $user['name'];
-    $_SESSION['role'] = $user['role'];
+    $_SESSION['user_id']     = (int) $user['id'];
+    $_SESSION['name']        = $user['name'];
+    $_SESSION['role']        = $user['role'];
     $_SESSION['is_verified'] = (int) $user['is_verified'];
 }
 
-function set_remember_me(PDO $pdo, int $userId): void
+function set_remember_me($conn, int $userId): void
 {
-    $config = app_config()['app'];
-    $selector = bin2hex(random_bytes(12));
-    $validator = bin2hex(random_bytes(32));
+    $config          = app_config()['app'];
+    $selector        = bin2hex(random_bytes(12));
+    $validator       = bin2hex(random_bytes(32));
     $hashedValidator = password_hash($validator, PASSWORD_DEFAULT);
-    $token = $selector . ':' . $hashedValidator;
+    $token           = $selector . ':' . $hashedValidator;
 
-    $userModel = new User($pdo);
+    $userModel = new User($conn);
     $userModel->setRememberToken($userId, $token);
 
-    $cookieValue = $selector . ':' . $validator;
     setcookie(
         $config['remember_cookie'],
-        $cookieValue,
+        $selector . ':' . $validator,
         [
             'expires'  => time() + ($config['remember_days'] * 86400),
             'path'     => '/',
@@ -237,13 +228,13 @@ function set_remember_me(PDO $pdo, int $userId): void
     );
 }
 
-function clear_remember_me(PDO $pdo, ?int $userId = null): void
+function clear_remember_me($conn, ?int $userId = null): void
 {
     $config     = app_config()['app'];
     $cookieName = $config['remember_cookie'];
 
     if ($userId !== null) {
-        $userModel = new User($pdo);
+        $userModel = new User($conn);
         $userModel->setRememberToken($userId, null);
     }
 

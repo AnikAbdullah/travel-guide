@@ -1,10 +1,13 @@
 <?php
-$pageTitle = '404 – Page Not Found';
+$pageTitle = '404 — Page Not Found';
 require __DIR__ . '/../partials/header.php';
 ?>
-<section class="hero" style="text-align:center;">
-  <h1>404</h1>
-  <p style="font-size:1.2rem; color:#64748b;">Oops — we couldn't find that page.</p>
-  <a class="btn" href="<?= e($baseUrl) ?>/home">Go Home</a>
-</section>
+<div class="container">
+  <div class="error-page">
+    <div class="error-code">404</div>
+    <h2>Oops — Page Not Found</h2>
+    <p>The page you're looking for doesn't exist or has been moved.</p>
+    <a class="btn btn-lg" href="<?= e($baseUrl) ?>/home">&#8592; Back to Home</a>
+  </div>
+</div>
 <?php require __DIR__ . '/../partials/footer.php'; ?>

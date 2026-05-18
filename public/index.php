@@ -10,20 +10,19 @@ require_once __DIR__ . '/../controllers/HomeController.php';
 require_once __DIR__ . '/../controllers/ProfileController.php';
 require_once __DIR__ . '/../controllers/WishlistController.php';
 
-$pdo = require __DIR__ . '/../config/database.php';
-restore_remember_me($pdo);
+$conn = require __DIR__ . '/../config/database.php';
+restore_remember_me($conn);
 
-$uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?: '/';
+$uri      = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?: '/';
 $basePath = rtrim(app_config()['app']['base_url'], '/');
-$route = substr($uri, strlen($basePath));
-$route = $route === false ? '/' : $route;
-$route = $route === '' ? '/' : $route;
-$method = $_SERVER['REQUEST_METHOD'];
+$route    = substr($uri, strlen($basePath));
+$route    = ($route === false || $route === '') ? '/' : $route;
+$method   = $_SERVER['REQUEST_METHOD'];
 
-$auth = new AuthController($pdo);
-$home = new HomeController($pdo);
-$profile = new ProfileController($pdo);
-$wishlist = new WishlistController($pdo);
+$auth     = new AuthController($conn);
+$home     = new HomeController($conn);
+$profile  = new ProfileController($conn);
+$wishlist = new WishlistController($conn);
 
 switch (true) {
     case $route === '/' && $method === 'GET':
