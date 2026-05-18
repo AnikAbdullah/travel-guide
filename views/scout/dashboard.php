@@ -2,10 +2,9 @@
 
 require_once "../../controllers/ScoutController.php";
 
-// $scout = scoutOnly();
+$scout       = scoutOnly();
 $currentPage = "dashboard";
 $pageTitle   = "Scout Dashboard";
-$scout       = ["name" => $_SESSION["name"] ?? "Scout"];
 
 require_once "../layout/header.php";
 

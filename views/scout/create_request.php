@@ -18,12 +18,7 @@ function e($value)
 $currentPage = "create";
 $pageTitle = "Create Post Request";
 
-// Auth bypass.
-// $scout = scoutOnly();
-$scout = [
-    "id" => $_SESSION["user_id"] ?? 1,
-    "name" => $_SESSION["name"] ?? "Test Scout",
-];
+$scout = scoutOnly();
 
 // Submit form.
 $result = handleCreatePostRequest($conn, $scout);

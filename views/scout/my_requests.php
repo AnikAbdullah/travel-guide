@@ -16,12 +16,7 @@ function e($value)
 $currentPage = "requests";
 $pageTitle   = "My Requests";
 
-// Auth bypass.
-// $scout = scoutOnly();
-$scout = [
-    "id"   => $_SESSION["user_id"] ?? 1,
-    "name" => $_SESSION["name"] ?? "Test Scout",
-];
+$scout = scoutOnly();
 
 $requests = getRequestsByScoutId($conn, (int) $scout["id"]);
 
