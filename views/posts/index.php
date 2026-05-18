@@ -31,6 +31,29 @@ function e($value)
     <h1>Travel Posts</h1>
     <input type="text" id="search" placeholder="Search posts..."
     onkeyup="searchPosts()">
+    <select id="genreFilter" onchange="filterPosts()">
+
+    <option value="">All Genres</option>
+
+    <option value="beach">Beach</option>
+    <option value="mountain">Mountain</option>
+    <option value="city">City</option>
+    <option value="historical">Historical</option>
+    <option value="adventure">Adventure</option>
+    <option value="religious">Religious</option>
+    <option value="nature">Nature</option>
+
+    </select>
+
+    <select id="costFilter" onchange="filterPosts()">
+
+    <option value="">All Costs</option>
+
+    <option value="low">Low</option>
+    <option value="medium">Medium</option>
+    <option value="high">High</option>
+
+</select>
 
     <?php if (empty($posts)): ?>
 
@@ -85,6 +108,7 @@ function e($value)
 
 </div>
     <script src="../../public/js/search.js"></script>
+    <script src="../../public/js/filter.js"></script>
 </body>
 
 </html>

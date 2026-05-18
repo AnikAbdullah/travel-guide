@@ -27,3 +27,11 @@ function searchTravelPosts($keyword)
 
     return searchPosts($conn, $keyword);
 }
+
+// Filter travel posts.
+function getFilteredPosts($genre, $cost)
+{
+    global $conn;
+
+    return filterPosts($conn, $genre, $cost);
+}

@@ -76,3 +76,46 @@ function searchPosts($conn, $keyword)
 
     return $posts;
 }
+
+// Filter approved posts.
+function filterPosts($conn, $genre, $cost)
+{
+    $sql = "SELECT *
+            FROM posts
+            WHERE status = 'approved'";
+
+    $params = [];
+    $types = "";
+
+    if ($genre !== "") {
+        $sql .= " AND genre = ?";
+        $params[] = $genre;
+        $types .= "s";
+    }
+
+    if ($cost !== "") {
+        $sql .= " AND cost_level = ?";
+        $params[] = $cost;
+        $types .= "s";
+    }
+
+    $sql .= " ORDER BY created_at DESC";
+
+    $stmt = mysqli_prepare($conn, $sql);
+
+    if (!empty($params)) {
+        mysqli_stmt_bind_param($stmt, $types, ...$params);
+    }
+
+    mysqli_stmt_execute($stmt);
+
+    $result = mysqli_stmt_get_result($stmt);
+
+    $posts = [];
+
+    while ($row = mysqli_fetch_assoc($result)) {
+        $posts[] = $row;
+    }
+
+    return $posts;
+}
