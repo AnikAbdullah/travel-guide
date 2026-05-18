@@ -1,96 +1,84 @@
 <?php
-
-declare(strict_types=1);
-
 class User
 {
-    public function __construct(private PDO $pdo)
-    {
-    }
+    public function __construct(private $conn) {}
 
     public function findByEmail(string $email): ?array
     {
-        $stmt = $this->pdo->prepare(
-            'SELECT * FROM users WHERE email = :email LIMIT 1'
-        );
-        $stmt->execute(['email' => $email]);
-        $user = $stmt->fetch();
-        return $user ?: null;
+        $stmt = mysqli_prepare($this->conn, 'SELECT * FROM users WHERE email = ? LIMIT 1');
+        mysqli_stmt_bind_param($stmt, 's', $email);
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+        $row = mysqli_fetch_assoc($result);
+        mysqli_stmt_close($stmt);
+        return $row ?: null;
     }
 
     public function findById(int $id): ?array
     {
-        $stmt = $this->pdo->prepare(
-            'SELECT * FROM users WHERE id = :id LIMIT 1'
-        );
-        $stmt->execute(['id' => $id]);
-        $user = $stmt->fetch();
-        return $user ?: null;
+        $stmt = mysqli_prepare($this->conn, 'SELECT * FROM users WHERE id = ? LIMIT 1');
+        mysqli_stmt_bind_param($stmt, 'i', $id);
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+        $row = mysqli_fetch_assoc($result);
+        mysqli_stmt_close($stmt);
+        return $row ?: null;
     }
 
-    /**
-     * Create a new user. Password is hashed here.
-     * is_verified defaults to 0 — admin must verify.
-     */
     public function create(array $data): bool
     {
-        $stmt = $this->pdo->prepare(
+        $hash = password_hash($data['password'], PASSWORD_DEFAULT);
+        $stmt = mysqli_prepare($this->conn,
             'INSERT INTO users (name, email, password_hash, role, is_verified)
-             VALUES (:name, :email, :password_hash, :role, 0)'
+             VALUES (?, ?, ?, ?, 0)'
         );
-
-        return $stmt->execute([
-            'name'          => $data['name'],
-            'email'         => $data['email'],
-            'password_hash' => password_hash($data['password'], PASSWORD_DEFAULT),
-            'role'          => $data['role'],
-        ]);
+        mysqli_stmt_bind_param($stmt, 'ssss',
+            $data['name'], $data['email'], $hash, $data['role']
+        );
+        $ok = mysqli_stmt_execute($stmt);
+        mysqli_stmt_close($stmt);
+        return $ok;
     }
 
-    /**
-     * Update name, email, and optionally profile_picture.
-     */
     public function updateProfile(int $id, array $data): bool
     {
-        $sql    = 'UPDATE users SET name = :name, email = :email';
-        $params = [
-            'name'  => $data['name'],
-            'email' => $data['email'],
-            'id'    => $id,
-        ];
-
         if (!empty($data['profile_picture'])) {
-            $sql .= ', profile_picture = :profile_picture';
-            $params['profile_picture'] = $data['profile_picture'];
+            $stmt = mysqli_prepare($this->conn,
+                'UPDATE users SET name = ?, email = ?, profile_picture = ? WHERE id = ?'
+            );
+            mysqli_stmt_bind_param($stmt, 'sssi',
+                $data['name'], $data['email'], $data['profile_picture'], $id
+            );
+        } else {
+            $stmt = mysqli_prepare($this->conn,
+                'UPDATE users SET name = ?, email = ? WHERE id = ?'
+            );
+            mysqli_stmt_bind_param($stmt, 'ssi', $data['name'], $data['email'], $id);
         }
-
-        $sql .= ' WHERE id = :id';
-        $stmt = $this->pdo->prepare($sql);
-        return $stmt->execute($params);
+        $ok = mysqli_stmt_execute($stmt);
+        mysqli_stmt_close($stmt);
+        return $ok;
     }
 
-    /**
-     * Update password hash directly (already hashed by caller).
-     */
     public function updatePassword(int $id, string $passwordHash): bool
     {
-        $stmt = $this->pdo->prepare(
-            'UPDATE users SET password_hash = :password_hash WHERE id = :id'
+        $stmt = mysqli_prepare($this->conn,
+            'UPDATE users SET password_hash = ? WHERE id = ?'
         );
-        return $stmt->execute([
-            'password_hash' => $passwordHash,
-            'id'            => $id,
-        ]);
+        mysqli_stmt_bind_param($stmt, 'si', $passwordHash, $id);
+        $ok = mysqli_stmt_execute($stmt);
+        mysqli_stmt_close($stmt);
+        return $ok;
     }
 
-    /**
-     * Store or clear the remember_token column.
-     */
     public function setRememberToken(int $id, ?string $token): bool
     {
-        $stmt = $this->pdo->prepare(
-            'UPDATE users SET remember_token = :token WHERE id = :id'
+        $stmt = mysqli_prepare($this->conn,
+            'UPDATE users SET remember_token = ? WHERE id = ?'
         );
-        return $stmt->execute(['token' => $token, 'id' => $id]);
+        mysqli_stmt_bind_param($stmt, 'si', $token, $id);
+        $ok = mysqli_stmt_execute($stmt);
+        mysqli_stmt_close($stmt);
+        return $ok;
     }
 }

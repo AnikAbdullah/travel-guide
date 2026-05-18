@@ -1,31 +1,25 @@
 <?php
-
-declare(strict_types=1);
-
+// mysqli connection — used by all Task 1 controllers
 $configFile = __DIR__ . '/config.php';
 if (!file_exists($configFile)) {
     $configFile = __DIR__ . '/config.example.php';
 }
+$_cfg = require $configFile;
 
-$config = require $configFile;
-
-$dsn = sprintf(
-    'mysql:host=%s;port=%s;dbname=%s;charset=%s',
-    $config['db']['host'],
-    $config['db']['port'],
-    $config['db']['name'],
-    $config['db']['charset']
+$conn = mysqli_connect(
+    $_cfg['db']['host'],
+    $_cfg['db']['user'],
+    $_cfg['db']['pass'],
+    $_cfg['db']['name'],
+    (int) $_cfg['db']['port']
 );
 
-try {
-    $pdo = new PDO($dsn, $config['db']['user'], $config['db']['pass'], [
-        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-        PDO::ATTR_EMULATE_PREPARES => false,
-    ]);
-} catch (PDOException $e) {
+if (!$conn) {
     http_response_code(500);
-    exit('Database connection failed. Import db/travel_guide.sql and db/task1_remember_token.sql.');
+    die('Database connection failed: ' . mysqli_connect_error());
 }
 
-return $pdo;
+mysqli_set_charset($conn, $_cfg['db']['charset']);
+unset($_cfg);
+
+return $conn;
