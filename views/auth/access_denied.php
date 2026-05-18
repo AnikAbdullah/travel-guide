@@ -2,7 +2,7 @@
 <html>
 <head>
 
-<title>404</title>
+<title>Access Denied</title>
 
 <link
 rel="stylesheet"
@@ -15,21 +15,18 @@ href="../../public/css/style.css"
 <div class="container">
 
 <h1>
-404
+Access Denied
 </h1>
 
-<h3>
-Page Not Found
-</h3>
-
 <p>
-The Page You Requested Does Not Exist
+You Do Not Have Permission
+To Access This Page
 </p>
 
 <a href="../home.php">
 
 <button>
-Go Home
+Return Home
 </button>
 
 </a>

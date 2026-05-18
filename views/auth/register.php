@@ -1,68 +1,80 @@
-<?php
-$pageTitle  = 'Create Account — Travel Guide';
-$pageScript = 'auth.js';
-require __DIR__ . '/../partials/header.php';
-?>
+<!DOCTYPE html>
+<html>
+<head>
 
-<div class="auth-wrap">
-  <div class="auth-card">
+<title>Register</title>
 
-    <div class="auth-logo">
-      <div class="auth-logo-icon">&#127758;</div>
-      <h1>Create Account</h1>
-      <p class="subtitle">Join thousands of travellers worldwide.</p>
-    </div>
+<link
+rel="stylesheet"
+href="../../public/css/style.css"
+>
 
-    <?php if (!empty($errors['general'])): ?>
-      <div class="alert alert-error">&#10007; <?= e($errors['general']) ?></div>
-    <?php endif; ?>
+</head>
+<body>
 
-    <form method="post" action="<?= e($baseUrl) ?>/register" id="registerForm" novalidate>
-      <?= csrf_field() ?>
+<div class="container">
 
-      <div class="form-group">
-        <label for="name">Full Name</label>
-        <input type="text" id="name" name="name" value="<?= e($old['name']) ?>" placeholder="John Doe" required>
-        <?php if (!empty($errors['name'])): ?><span class="field-error"><?= e($errors['name']) ?></span><?php endif; ?>
-        <span class="field-error" data-error-for="name"></span>
-      </div>
+<h2>Create Account</h2>
 
-      <div class="form-group">
-        <label for="email">Email Address</label>
-        <input type="email" id="email" name="email" value="<?= e($old['email']) ?>" placeholder="you@example.com" required>
-        <?php if (!empty($errors['email'])): ?><span class="field-error"><?= e($errors['email']) ?></span><?php endif; ?>
-        <span class="field-error" data-error-for="email"></span>
-      </div>
+<form
+action="../../controllers/AuthController.php"
+method="POST"
+>
 
-      <div class="form-group">
-        <label for="role">I am a</label>
-        <select id="role" name="role" required>
-          <option value="user"  <?= $old['role'] === 'user'  ? 'selected' : '' ?>>&#128100; General User</option>
-          <option value="scout" <?= $old['role'] === 'scout' ? 'selected' : '' ?>>&#128269; Scout</option>
-          <option value="admin" <?= $old['role'] === 'admin' ? 'selected' : '' ?>>&#9881; Admin</option>
-        </select>
-        <?php if (!empty($errors['role'])): ?><span class="field-error"><?= e($errors['role']) ?></span><?php endif; ?>
-      </div>
+<input
+type="text"
+name="name"
+placeholder="Full Name"
+required
+>
 
-      <div class="form-group">
-        <label for="password">Password</label>
-        <input type="password" id="password" name="password" minlength="8" placeholder="Min. 8 characters" required>
-        <?php if (!empty($errors['password'])): ?><span class="field-error"><?= e($errors['password']) ?></span><?php endif; ?>
-        <span class="field-error" data-error-for="password"></span>
-      </div>
+<input
+type="email"
+name="email"
+placeholder="Email"
+required
+>
 
-      <div class="form-group">
-        <label for="confirm_password">Confirm Password</label>
-        <input type="password" id="confirm_password" name="confirm_password" placeholder="Repeat password" required>
-        <?php if (!empty($errors['confirm_password'])): ?><span class="field-error"><?= e($errors['confirm_password']) ?></span><?php endif; ?>
-        <span class="field-error" data-error-for="confirm_password"></span>
-      </div>
+<input
+type="password"
+name="password"
+placeholder="Password"
+required
+>
 
-      <button type="submit" class="btn" style="width:100%;justify-content:center;">Create My Account &rarr;</button>
-    </form>
+<select name="role">
 
-    <p class="form-footer">Already have an account? <a href="<?= e($baseUrl) ?>/login">Sign in</a></p>
-  </div>
+<option value="user">
+General User
+</option>
+
+<option value="scout">
+Scout
+</option>
+
+<option value="admin">
+Admin
+</option>
+
+</select>
+
+<button type="submit">
+Register
+</button>
+
+</form>
+
+<br>
+
+<center>
+
+<a href="login.php">
+Already Have An Account?
+</a>
+
+</center>
+
 </div>
 
-<?php require __DIR__ . '/../partials/footer.php'; ?>
+</body>
+</html>

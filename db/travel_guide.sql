@@ -1,103 +1,108 @@
--- Travel Guide – Full Schema (Task 1: 22-46960-1)
--- Run this file once to set up the database.
-
 CREATE DATABASE IF NOT EXISTS travel_guide;
+
 USE travel_guide;
 
-CREATE TABLE IF NOT EXISTS users (
+CREATE TABLE users(
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
-    email VARCHAR(150) NOT NULL UNIQUE,
+    email VARCHAR(100) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
-    role ENUM('admin', 'scout', 'user') NOT NULL DEFAULT 'user',
-    is_verified TINYINT(1) NOT NULL DEFAULT 0,
-    profile_picture VARCHAR(255) DEFAULT NULL,
-    remember_token VARCHAR(255) DEFAULT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    role ENUM(
+        'admin',
+        'scout',
+        'user'
+    ) NOT NULL,
+    is_verified TINYINT(1) DEFAULT 0,
+    profile_picture VARCHAR(255),
+    created_at TIMESTAMP
+    DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE IF NOT EXISTS posts (
+CREATE TABLE posts(
     id INT AUTO_INCREMENT PRIMARY KEY,
-    scout_id INT NOT NULL,
-    title VARCHAR(150) NOT NULL,
-    short_history TEXT NOT NULL,
-    country VARCHAR(100) NOT NULL,
-    genre VARCHAR(50) NOT NULL,
-    cost_level ENUM('low', 'medium', 'high') NOT NULL,
-    travel_medium_info TEXT NOT NULL,
-    status ENUM('pending', 'approved', 'rejected') NOT NULL DEFAULT 'pending',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    scout_id INT,
+    title VARCHAR(255),
+    short_history TEXT,
+    country VARCHAR(100),
+    genre VARCHAR(100),
+    cost_level ENUM(
+        'low',
+        'medium',
+        'high'
+    ),
+    travel_medium_info TEXT,
+    status ENUM(
+        'pending',
+        'approved',
+        'rejected'
+    ),
+    created_at TIMESTAMP
+    DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT fk_posts_scout
-        FOREIGN KEY (scout_id) REFERENCES users(id)
-        ON DELETE CASCADE
+    FOREIGN KEY (scout_id)
+    REFERENCES users(id)
+    ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS post_requests (
+CREATE TABLE wishlist(
     id INT AUTO_INCREMENT PRIMARY KEY,
-    scout_id INT NOT NULL,
-    post_data JSON NOT NULL,
-    requested_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    status ENUM('pending', 'approved', 'rejected') NOT NULL DEFAULT 'pending',
-    original_post_id INT DEFAULT NULL,
+    user_id INT,
+    post_id INT,
+    added_at TIMESTAMP
+    DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT fk_post_requests_scout
-        FOREIGN KEY (scout_id) REFERENCES users(id)
-        ON DELETE CASCADE
+    FOREIGN KEY(user_id)
+    REFERENCES users(id)
+    ON DELETE CASCADE,
+
+    FOREIGN KEY(post_id)
+    REFERENCES posts(id)
+    ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS wishlist (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT NOT NULL,
-    post_id INT NOT NULL,
-    added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT fk_wishlist_user
-        FOREIGN KEY (user_id) REFERENCES users(id)
-        ON DELETE CASCADE,
-
-    CONSTRAINT fk_wishlist_post
-        FOREIGN KEY (post_id) REFERENCES posts(id)
-        ON DELETE CASCADE,
-
-    UNIQUE KEY unique_user_post (user_id, post_id)
-);
-
-CREATE TABLE IF NOT EXISTS comments (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    post_id INT NOT NULL,
-    user_id INT NOT NULL,
-    content TEXT NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT fk_comments_post
-        FOREIGN KEY (post_id) REFERENCES posts(id)
-        ON DELETE CASCADE,
-
-    CONSTRAINT fk_comments_user
-        FOREIGN KEY (user_id) REFERENCES users(id)
-        ON DELETE CASCADE
-);
-
-CREATE TABLE IF NOT EXISTS cost_estimates (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    post_id INT NOT NULL,
-    base_cost DECIMAL(10,2) NOT NULL,
-    currency VARCHAR(10) NOT NULL DEFAULT 'BDT',
-    last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-
-    CONSTRAINT fk_cost_estimates_post
-        FOREIGN KEY (post_id) REFERENCES posts(id)
-        ON DELETE CASCADE
-);
-
--- Seed: default admin account (password: Admin@1234)
-INSERT IGNORE INTO users (name, email, password_hash, role, is_verified)
-VALUES (
+INSERT INTO users(
+    name,
+    email,
+    password_hash,
+    role,
+    is_verified
+)
+VALUES(
     'Admin',
-    'admin@travelguide.com',
-    '$2y$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi',
+    'admin@travel.com',
+    '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/.V3Dbpr9Fqvle',
     'admin',
     1
+);
+
+INSERT INTO posts(
+    scout_id,
+    title,
+    short_history,
+    country,
+    genre,
+    cost_level,
+    travel_medium_info,
+    status
+)
+VALUES
+(
+    1,
+    'Coxs Bazar',
+    'Longest Sea Beach In The World',
+    'Bangladesh',
+    'Beach',
+    'medium',
+    'Bus, Flight',
+    'approved'
+),
+(
+    1,
+    'Sajek Valley',
+    'Beautiful Hill Area',
+    'Bangladesh',
+    'Mountain',
+    'low',
+    'Bus, Jeep',
+    'approved'
 );

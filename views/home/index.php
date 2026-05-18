@@ -7,15 +7,17 @@ require __DIR__ . '/../partials/header.php';
 <?php if (!is_logged_in()): ?>
 
 <section class="hero-banner">
+  <div class="hero-orb hero-orb-1"></div>
+  <div class="hero-orb hero-orb-2"></div>
   <div class="container">
-    <div class="hero-eyebrow anim-up">✈ Your World Awaits</div>
-    <h1 class="anim-up-2">Discover Your Next<br><span class="highlight">Great Adventure</span></h1>
-    <p class="anim-up-3">Explore curated destinations worldwide — beaches, mountains, cities, and hidden gems. Plan smarter, travel better.</p>
-    <div class="hero-actions anim-up-4">
-      <a class="btn btn-accent btn-lg" href="<?= e($baseUrl) ?>/register">🚀 Get Started Free</a>
-      <a class="btn btn-white btn-lg"  href="<?= e($baseUrl) ?>/login">Sign In</a>
+    <div class="hero-eyebrow au">✈ Your World Awaits</div>
+    <h1 class="au2">Discover Your Next<br><span class="highlight">Great Adventure</span></h1>
+    <p class="au3">Explore curated destinations worldwide — beaches, mountains, cities, and hidden gems. Plan smarter, travel better.</p>
+    <div class="hero-actions au4">
+      <a class="btn btn-accent btn-xl" href="<?= e($baseUrl) ?>/register">🚀 Get Started Free</a>
+      <a class="btn btn-ghost btn-xl" href="<?= e($baseUrl) ?>/login">Sign In</a>
     </div>
-    <div class="hero-stats anim-up-4">
+    <div class="hero-stats au5">
       <div class="hero-stat"><strong>500+</strong><span>Destinations</span></div>
       <div class="hero-stat"><strong>50+</strong><span>Countries</span></div>
       <div class="hero-stat"><strong>1K+</strong><span>Travellers</span></div>
@@ -31,22 +33,22 @@ require __DIR__ . '/../partials/header.php';
       <div class="line"></div>
     </div>
     <div class="feature-grid">
-      <div class="feature-card anim-up">
+      <div class="feature-card au">
         <div class="feature-icon-wrap">🌍</div>
         <h3>Worldwide Destinations</h3>
         <p>Curated posts covering beaches, mountains, cities, and historical sites across the globe.</p>
       </div>
-      <div class="feature-card anim-up-2">
+      <div class="feature-card au2">
         <div class="feature-icon-wrap">♡</div>
         <h3>Personal Wishlist</h3>
         <p>Save your favourite destinations and build your dream travel checklist at your own pace.</p>
       </div>
-      <div class="feature-card anim-up-3">
+      <div class="feature-card au3">
         <div class="feature-icon-wrap">💰</div>
         <h3>Cost Estimates</h3>
         <p>Get realistic cost breakdowns per destination so you can budget your trips effectively.</p>
       </div>
-      <div class="feature-card anim-up-4">
+      <div class="feature-card au4">
         <div class="feature-icon-wrap">🔍</div>
         <h3>Smart Search</h3>
         <p>Filter by country, genre, and cost level to find exactly the destination you're looking for.</p>
@@ -63,17 +65,17 @@ require __DIR__ . '/../partials/header.php';
       <div class="line"></div>
     </div>
     <div class="how-grid">
-      <div class="how-step anim-up">
+      <div class="how-step au">
         <div class="how-num">1</div>
         <h3>Create Account</h3>
         <p>Register as a General User, Scout, or Admin in under a minute.</p>
       </div>
-      <div class="how-step anim-up-2">
+      <div class="how-step au2">
         <div class="how-num">2</div>
         <h3>Browse Destinations</h3>
         <p>Explore approved travel posts filtered by country, genre, and budget.</p>
       </div>
-      <div class="how-step anim-up-3">
+      <div class="how-step au3">
         <div class="how-num">3</div>
         <h3>Save & Plan</h3>
         <p>Add destinations to your wishlist and get cost estimates for your trip.</p>
@@ -134,10 +136,10 @@ require __DIR__ . '/../partials/header.php';
         $icon = $genreIcons[$g] ?? '🌍';
         $grad = $gradients[$g] ?? $gradients['other'];
       ?>
-        <article class="post-card anim-up">
+        <article class="post-card au">
           <div class="post-card-img">
             <div class="post-card-img-bg" style="background:<?= $grad ?>"></div>
-            <span><?= $icon ?></span>
+            <span class="post-card-img-icon"><?= $icon ?></span>
           </div>
           <div class="post-card-body">
             <span class="tag"><?= e(ucfirst($post['genre'])) ?></span>
