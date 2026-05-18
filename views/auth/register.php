@@ -1,80 +1,143 @@
+<?php
+
+require_once "../../config/db.php";
+require_once "../../controllers/AuthController.php";
+require_once "../../helpers/auth.php";
+
+requireGuest();
+
+function e($value)
+{
+    return htmlspecialchars($value ?? "");
+}
+
+$pageTitle   = "Register";
+$currentPage = "register";
+
+$result = handleRegister($conn);
+
+$input  = $result["input"];
+$errors = $result["errors"];
+
+?>
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><?= e($pageTitle) ?> | Travel Guide</title>
 
-<title>Register</title>
-
-<link
-rel="stylesheet"
-href="../../public/css/style.css"
->
-
+    <link rel="stylesheet" href="../../public/css/auth.css">
 </head>
 <body>
 
-<div class="container">
+<?php require_once "../partials/navbar.php"; ?>
 
-<h2>Create Account</h2>
+<main class="auth-container">
 
-<form
-action="../../controllers/AuthController.php"
-method="POST"
->
+    <h2>Create Account</h2>
 
-<input
-type="text"
-name="name"
-placeholder="Full Name"
-required
->
+    <?php if (isset($errors["form"])): ?>
+        <div class="alert alert-error">
+            <?= e($errors["form"]) ?>
+        </div>
+    <?php endif; ?>
 
-<input
-type="email"
-name="email"
-placeholder="Email"
-required
->
+    <form
+        name="registerForm"
+        method="POST"
+        action="register.php"
+        onsubmit="return validateRegisterForm()"
+    >
 
-<input
-type="password"
-name="password"
-placeholder="Password"
-required
->
+        <label for="name">Full Name</label>
 
-<select name="role">
+        <input
+            type="text"
+            id="name"
+            name="name"
+            value="<?= e($input["name"]) ?>"
+        >
 
-<option value="user">
-General User
-</option>
+        <span class="form-error" id="name_error">
+            <?= e($errors["name"] ?? "") ?>
+        </span>
 
-<option value="scout">
-Scout
-</option>
+        <label for="email">Email</label>
 
-<option value="admin">
-Admin
-</option>
+        <input
+            type="email"
+            id="email"
+            name="email"
+            value="<?= e($input["email"]) ?>"
+        >
 
-</select>
+        <span class="form-error" id="email_error">
+            <?= e($errors["email"] ?? "") ?>
+        </span>
 
-<button type="submit">
-Register
-</button>
+        <label for="password">Password</label>
 
-</form>
+        <input
+            type="password"
+            id="password"
+            name="password"
+        >
 
-<br>
+        <span class="form-error" id="password_error">
+            <?= e($errors["password"] ?? "") ?>
+        </span>
 
-<center>
+        <label for="confirm_password">Confirm Password</label>
 
-<a href="login.php">
-Already Have An Account?
-</a>
+        <input
+            type="password"
+            id="confirm_password"
+            name="confirm_password"
+        >
 
-</center>
+        <span class="form-error" id="confirm_password_error">
+            <?= e($errors["confirm_password"] ?? "") ?>
+        </span>
 
-</div>
+        <label for="role">Role</label>
+
+        <select id="role" name="role">
+            <option value="">Select Role</option>
+
+            <option
+                value="user"
+                <?= ($input["role"] ?? "") === "user" ? "selected" : "" ?>
+            >
+                General User
+            </option>
+
+            <option
+                value="scout"
+                <?= ($input["role"] ?? "") === "scout" ? "selected" : "" ?>
+            >
+                Scout
+            </option>
+        </select>
+
+        <span class="form-error" id="role_error">
+            <?= e($errors["role"] ?? "") ?>
+        </span>
+
+        <button type="submit">
+            Register
+        </button>
+
+    </form>
+
+    <p class="bottom-link">
+        Already have an account?
+        <a href="login.php">Login</a>
+    </p>
+
+</main>
+
+<script src="../../public/js/auth.js"></script>
 
 </body>
 </html>
