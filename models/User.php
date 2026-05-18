@@ -10,7 +10,9 @@ class User
 
     public function findByEmail(string $email): ?array
     {
-        $stmt = $this->pdo->prepare('SELECT * FROM users WHERE email = :email LIMIT 1');
+        $stmt = $this->pdo->prepare(
+            'SELECT * FROM users WHERE email = :email LIMIT 1'
+        );
         $stmt->execute(['email' => $email]);
         $user = $stmt->fetch();
         return $user ?: null;
@@ -18,12 +20,18 @@ class User
 
     public function findById(int $id): ?array
     {
-        $stmt = $this->pdo->prepare('SELECT * FROM users WHERE id = :id LIMIT 1');
+        $stmt = $this->pdo->prepare(
+            'SELECT * FROM users WHERE id = :id LIMIT 1'
+        );
         $stmt->execute(['id' => $id]);
         $user = $stmt->fetch();
         return $user ?: null;
     }
 
+    /**
+     * Create a new user. Password is hashed here.
+     * is_verified defaults to 0 — admin must verify.
+     */
     public function create(array $data): bool
     {
         $stmt = $this->pdo->prepare(
@@ -32,20 +40,23 @@ class User
         );
 
         return $stmt->execute([
-            'name' => $data['name'],
-            'email' => $data['email'],
+            'name'          => $data['name'],
+            'email'         => $data['email'],
             'password_hash' => password_hash($data['password'], PASSWORD_DEFAULT),
-            'role' => $data['role'],
+            'role'          => $data['role'],
         ]);
     }
 
+    /**
+     * Update name, email, and optionally profile_picture.
+     */
     public function updateProfile(int $id, array $data): bool
     {
-        $sql = 'UPDATE users SET name = :name, email = :email';
+        $sql    = 'UPDATE users SET name = :name, email = :email';
         $params = [
-            'name' => $data['name'],
+            'name'  => $data['name'],
             'email' => $data['email'],
-            'id' => $id,
+            'id'    => $id,
         ];
 
         if (!empty($data['profile_picture'])) {
@@ -58,12 +69,28 @@ class User
         return $stmt->execute($params);
     }
 
+    /**
+     * Update password hash directly (already hashed by caller).
+     */
     public function updatePassword(int $id, string $passwordHash): bool
     {
-        $stmt = $this->pdo->prepare('UPDATE users SET password_hash = :password_hash WHERE id = :id');
+        $stmt = $this->pdo->prepare(
+            'UPDATE users SET password_hash = :password_hash WHERE id = :id'
+        );
         return $stmt->execute([
             'password_hash' => $passwordHash,
-            'id' => $id,
+            'id'            => $id,
         ]);
+    }
+
+    /**
+     * Store or clear the remember_token column.
+     */
+    public function setRememberToken(int $id, ?string $token): bool
+    {
+        $stmt = $this->pdo->prepare(
+            'UPDATE users SET remember_token = :token WHERE id = :id'
+        );
+        return $stmt->execute(['token' => $token, 'id' => $id]);
     }
 }

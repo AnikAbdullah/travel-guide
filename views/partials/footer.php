@@ -1,7 +1,7 @@
   </main>
   <footer class="site-footer">
     <div class="container">
-      <p>Travel Guide &mdash; Task 1 (22-46960-1)</p>
+      <p>&copy; <?= date('Y') ?> Travel Guide &mdash; Web Technologies Project</p>
     </div>
   </footer>
   <?php if (!empty($pageScript)): ?>

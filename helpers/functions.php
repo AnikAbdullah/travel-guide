@@ -107,6 +107,30 @@ function validate_role(string $role): bool
     return in_array($role, ['admin', 'scout', 'user'], true);
 }
 
+// ── CSRF ──────────────────────────────────────────────────────────────────────
+
+function csrf_token(): string
+{
+    if (empty($_SESSION['csrf_token'])) {
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    }
+    return $_SESSION['csrf_token'];
+}
+
+function csrf_field(): string
+{
+    return '<input type="hidden" name="csrf_token" value="' . csrf_token() . '">';
+}
+
+function verify_csrf(): void
+{
+    $token = $_POST['csrf_token'] ?? '';
+    if (!hash_equals(csrf_token(), $token)) {
+        http_response_code(403);
+        exit('Invalid CSRF token. Please go back and try again.');
+    }
+}
+
 function handle_profile_upload(array $file, string $uploadDir): array
 {
     if ($file['error'] === UPLOAD_ERR_NO_FILE) {
@@ -197,16 +221,16 @@ function set_remember_me(PDO $pdo, int $userId): void
     $hashedValidator = password_hash($validator, PASSWORD_DEFAULT);
     $token = $selector . ':' . $hashedValidator;
 
-    $stmt = $pdo->prepare('UPDATE users SET remember_token = :token WHERE id = :id');
-    $stmt->execute(['token' => $token, 'id' => $userId]);
+    $userModel = new User($pdo);
+    $userModel->setRememberToken($userId, $token);
 
     $cookieValue = $selector . ':' . $validator;
     setcookie(
         $config['remember_cookie'],
         $cookieValue,
         [
-            'expires' => time() + ($config['remember_days'] * 86400),
-            'path' => '/',
+            'expires'  => time() + ($config['remember_days'] * 86400),
+            'path'     => '/',
             'httponly' => true,
             'samesite' => 'Lax',
         ]
@@ -215,17 +239,17 @@ function set_remember_me(PDO $pdo, int $userId): void
 
 function clear_remember_me(PDO $pdo, ?int $userId = null): void
 {
-    $config = app_config()['app'];
+    $config     = app_config()['app'];
     $cookieName = $config['remember_cookie'];
 
     if ($userId !== null) {
-        $stmt = $pdo->prepare('UPDATE users SET remember_token = NULL WHERE id = :id');
-        $stmt->execute(['id' => $userId]);
+        $userModel = new User($pdo);
+        $userModel->setRememberToken($userId, null);
     }
 
     setcookie($cookieName, '', [
-        'expires' => time() - 3600,
-        'path' => '/',
+        'expires'  => time() - 3600,
+        'path'     => '/',
         'httponly' => true,
         'samesite' => 'Lax',
     ]);

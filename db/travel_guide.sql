@@ -1,7 +1,10 @@
+-- Travel Guide – Full Schema (Task 1: 22-46960-1)
+-- Run this file once to set up the database.
+
 CREATE DATABASE IF NOT EXISTS travel_guide;
 USE travel_guide;
 
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     email VARCHAR(150) NOT NULL UNIQUE,
@@ -9,10 +12,11 @@ CREATE TABLE users (
     role ENUM('admin', 'scout', 'user') NOT NULL DEFAULT 'user',
     is_verified TINYINT(1) NOT NULL DEFAULT 0,
     profile_picture VARCHAR(255) DEFAULT NULL,
+    remember_token VARCHAR(255) DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE posts (
+CREATE TABLE IF NOT EXISTS posts (
     id INT AUTO_INCREMENT PRIMARY KEY,
     scout_id INT NOT NULL,
     title VARCHAR(150) NOT NULL,
@@ -30,19 +34,20 @@ CREATE TABLE posts (
         ON DELETE CASCADE
 );
 
-CREATE TABLE post_requests (
+CREATE TABLE IF NOT EXISTS post_requests (
     id INT AUTO_INCREMENT PRIMARY KEY,
     scout_id INT NOT NULL,
     post_data JSON NOT NULL,
     requested_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     status ENUM('pending', 'approved', 'rejected') NOT NULL DEFAULT 'pending',
+    original_post_id INT DEFAULT NULL,
 
     CONSTRAINT fk_post_requests_scout
         FOREIGN KEY (scout_id) REFERENCES users(id)
         ON DELETE CASCADE
 );
 
-CREATE TABLE wishlist (
+CREATE TABLE IF NOT EXISTS wishlist (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
     post_id INT NOT NULL,
@@ -59,7 +64,7 @@ CREATE TABLE wishlist (
     UNIQUE KEY unique_user_post (user_id, post_id)
 );
 
-CREATE TABLE comments (
+CREATE TABLE IF NOT EXISTS comments (
     id INT AUTO_INCREMENT PRIMARY KEY,
     post_id INT NOT NULL,
     user_id INT NOT NULL,
@@ -75,7 +80,7 @@ CREATE TABLE comments (
         ON DELETE CASCADE
 );
 
-CREATE TABLE cost_estimates (
+CREATE TABLE IF NOT EXISTS cost_estimates (
     id INT AUTO_INCREMENT PRIMARY KEY,
     post_id INT NOT NULL,
     base_cost DECIMAL(10,2) NOT NULL,
@@ -85,4 +90,14 @@ CREATE TABLE cost_estimates (
     CONSTRAINT fk_cost_estimates_post
         FOREIGN KEY (post_id) REFERENCES posts(id)
         ON DELETE CASCADE
+);
+
+-- Seed: default admin account (password: Admin@1234)
+INSERT IGNORE INTO users (name, email, password_hash, role, is_verified)
+VALUES (
+    'Admin',
+    'admin@travelguide.com',
+    '$2y$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi',
+    'admin',
+    1
 );
