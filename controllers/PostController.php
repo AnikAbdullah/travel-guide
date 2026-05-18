@@ -10,9 +10,12 @@ function browsePosts()
 {
     global $conn;
 
-    // Get all approved posts from model.
-    $posts = getAllApprovedPosts($conn);
+    return getAllApprovedPosts($conn);
+}
+// Get single post details.
+function getPostDetails($id)
+{
+    global $conn;
 
-    // Open view page.
-    require_once __DIR__ . "/../views/posts/index.php";
+    return getPostById($conn, $id);
 }
