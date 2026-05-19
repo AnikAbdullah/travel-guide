@@ -1,0 +1,293 @@
+<?php
+
+session_start();
+
+require_once __DIR__ . "/../config/db.php";
+require_once __DIR__ . "/../models/Scout.php";
+require_once __DIR__ . "/../models/PostRequest.php";
+require_once __DIR__ . "/../models/Post.php";
+
+// CSRF helpers.
+function csrfToken()
+{
+    if (empty($_SESSION["csrf_token"])) {
+        $_SESSION["csrf_token"] = bin2hex(random_bytes(32));
+    }
+    return $_SESSION["csrf_token"];
+}
+
+function checkCsrf($token)
+{
+    return !empty($token)
+        && !empty($_SESSION["csrf_token"])
+        && hash_equals($_SESSION["csrf_token"], $token);
+}
+
+// Scout auth.
+function scoutOnly()
+{
+    global $conn;
+
+    if (!isset($_SESSION["user_id"])) {
+        header("Location: ../auth/login.php");
+        exit;
+    }
+
+    if (!isset($_SESSION["role"]) || $_SESSION["role"] !== "scout") {
+        header("Location: forbidden.php");
+        exit;
+    }
+
+    $scout = getScoutById($conn, $_SESSION["user_id"]);
+
+    if (!$scout || $scout["is_verified"] != 1) {
+        header("Location: forbidden.php");
+        exit;
+    }
+
+    return $scout;
+}
+
+// Validate form.
+function validatePostRequestForm($data)
+{
+    $errors = [];
+    $validGenres = ["beach", "mountain", "city", "historical", "adventure", "religious", "nature", "other"];
+    $validCosts = ["low", "medium", "high"];
+
+    if (empty($data["title"])) {
+        $errors["title"] = "Title is required.";
+    }
+
+    if (empty($data["short_history"])) {
+        $errors["short_history"] = "Short history is required.";
+    }
+
+    if (empty($data["country_representation"])) {
+        $errors["country_representation"] = "Country representation is required.";
+    }
+
+    if (empty($data["travel_medium_info"])) {
+        $errors["travel_medium_info"] = "Travel medium information is required.";
+    }
+
+    if ($data["title"] !== "" && strlen($data["title"]) > 150) {
+        $errors["title"] = "Title must be 150 characters or less.";
+    }
+
+    if (!in_array($data["genre"], $validGenres)) {
+        $errors["genre"] = "Select a valid genre.";
+    }
+
+    if (!in_array($data["cost_level"], $validCosts)) {
+        $errors["cost_level"] = "Select a valid cost level.";
+    }
+
+    return $errors;
+}
+
+// Upload image.
+function uploadPostRequestImage($file, $scoutId)
+{
+    if (!isset($file["error"]) || $file["error"] === UPLOAD_ERR_NO_FILE) {
+        return ["path" => null, "error" => null];
+    }
+
+    if ($file["error"] !== UPLOAD_ERR_OK) {
+        return ["path" => null, "error" => "Image upload failed."];
+    }
+
+    if ((int) $file["size"] > 2 * 1024 * 1024) {
+        return ["path" => null, "error" => "Image size must be 2MB or less."];
+    }
+
+    $mimeType = mime_content_type($file["tmp_name"]);
+
+    $allowedTypes = [
+        "image/jpeg" => "jpg",
+        "image/png" => "png",
+        "image/webp" => "webp",
+    ];
+
+    if (!isset($allowedTypes[$mimeType])) {
+        return ["path" => null, "error" => "Only JPG, PNG, or WebP images are allowed."];
+    }
+
+    $uploadDir = __DIR__ . "/../public/uploads/posts";
+    if (!is_dir($uploadDir) && !mkdir($uploadDir, 0755, true)) {
+        return ["path" => null, "error" => "Could not prepare upload folder."];
+    }
+
+    $fileName = "post_" . (int) $scoutId . "_" . time() . "_" . rand(1000, 9999) . "." . $allowedTypes[$mimeType];
+    $targetPath = $uploadDir . "/" . $fileName;
+
+    if (!move_uploaded_file($file["tmp_name"], $targetPath)) {
+        return ["path" => null, "error" => "Could not save uploaded image."];
+    }
+
+    return ["path" => "public/uploads/posts/" . $fileName, "error" => null];
+}
+
+// Handle submit.
+function handleCreatePostRequest($conn, $scout)
+{
+    $input = [
+        "title" => trim($_POST["title"] ?? ""),
+        "short_history" => trim($_POST["short_history"] ?? ""),
+        "country_representation" => trim($_POST["country_representation"] ?? ""),
+        "genre" => trim($_POST["genre"] ?? ""),
+        "cost_level" => trim($_POST["cost_level"] ?? ""),
+        "travel_medium_info" => trim($_POST["travel_medium_info"] ?? ""),
+    ];
+    $errors = [];
+
+    if ($_SERVER["REQUEST_METHOD"] !== "POST") {
+        return ["input" => $input, "errors" => $errors];
+    }
+
+    if (!checkCsrf($_POST["csrf_token"] ?? "")) {
+        http_response_code(400);
+        exit("Invalid CSRF token.");
+    }
+
+    $errors = validatePostRequestForm($input);
+    $upload = ["path" => null, "error" => null];
+
+    if (!$errors) {
+        $upload = uploadPostRequestImage($_FILES["post_image"] ?? [], $scout["id"]);
+        if ($upload["error"]) {
+            $errors["image"] = $upload["error"];
+        }
+    }
+
+    if ($errors) {
+        return ["input" => $input, "errors" => $errors];
+    }
+
+    $postData = $input;
+    $postData["image_path"] = $upload["path"];
+
+    if (!createPostRequest($conn, (int) $scout["id"], $postData)) {
+        $errors["form"] = "Post request could not be saved. Please check the scout account and try again.";
+        return ["input" => $input, "errors" => $errors];
+    }
+
+    $_SESSION["flash_success"] = "Post request submitted for admin review.";
+    header("Location: create_request.php");
+    exit;
+}
+
+// Handle change request.
+function handleRequestChanges($conn, $scout, $postId)
+{
+    $post = getApprovedPostByIdAndScout($conn, $postId, (int) $scout["id"]);
+
+    if (!$post) {
+        return ["post" => null, "input" => [], "errors" => []];
+    }
+
+    $input = [
+        "title"                  => $post["title"],
+        "short_history"          => $post["short_history"],
+        "country_representation" => $post["country"],
+        "genre"                  => $post["genre"],
+        "cost_level"             => $post["cost_level"],
+        "travel_medium_info"     => $post["travel_medium_info"],
+    ];
+
+    if ($_SERVER["REQUEST_METHOD"] !== "POST") {
+        return ["post" => $post, "input" => $input, "errors" => []];
+    }
+
+    if (!checkCsrf($_POST["csrf_token"] ?? "")) {
+        http_response_code(400);
+        exit("Invalid CSRF token.");
+    }
+
+    $input = [
+        "title"                  => trim($_POST["title"] ?? ""),
+        "short_history"          => trim($_POST["short_history"] ?? ""),
+        "country_representation" => trim($_POST["country_representation"] ?? ""),
+        "genre"                  => trim($_POST["genre"] ?? ""),
+        "cost_level"             => trim($_POST["cost_level"] ?? ""),
+        "travel_medium_info"     => trim($_POST["travel_medium_info"] ?? ""),
+    ];
+    $errors = validatePostRequestForm($input);
+
+    if (!$errors) {
+        $upload = uploadPostRequestImage($_FILES["post_image"] ?? [], $scout["id"]);
+        if ($upload["error"]) {
+            $errors["image"] = $upload["error"];
+        }
+    }
+
+    if ($errors) {
+        return ["post" => $post, "input" => $input, "errors" => $errors];
+    }
+
+    $postData = $input + ["type" => "change_request", "original_post_id" => $postId, "image_path" => $upload["path"]];
+
+    if (!createPostRequest($conn, (int) $scout["id"], $postData)) {
+        return ["post" => $post, "input" => $input, "errors" => ["form" => "Change request could not be saved. Please try again."]];
+    }
+
+    $_SESSION["flash_success"] = "Change request submitted for admin review.";
+    header("Location: approved_posts.php");
+    exit;
+}
+
+// Handle edit.
+function handleEditPostRequest($conn, $scout, $requestId)
+{
+    $request = getRequestById($conn, $requestId, (int) $scout["id"]);
+
+    if (!$request || $request["status"] !== "pending") {
+        return ["request" => null, "input" => [], "errors" => []];
+    }
+
+    $input  = $request["post_data"];
+    $errors = [];
+
+    if ($_SERVER["REQUEST_METHOD"] !== "POST") {
+        return ["request" => $request, "input" => $input, "errors" => $errors];
+    }
+
+    if (!checkCsrf($_POST["csrf_token"] ?? "")) {
+        http_response_code(400);
+        exit("Invalid CSRF token.");
+    }
+
+    $input = [
+        "title"                  => trim($_POST["title"] ?? ""),
+        "short_history"          => trim($_POST["short_history"] ?? ""),
+        "country_representation" => trim($_POST["country_representation"] ?? ""),
+        "genre"                  => trim($_POST["genre"] ?? ""),
+        "cost_level"             => trim($_POST["cost_level"] ?? ""),
+        "travel_medium_info"     => trim($_POST["travel_medium_info"] ?? ""),
+    ];
+    $errors = validatePostRequestForm($input);
+    $upload = ["path" => null, "error" => null];
+
+    if (!$errors) {
+        $upload = uploadPostRequestImage($_FILES["post_image"] ?? [], $scout["id"]);
+        if ($upload["error"]) {
+            $errors["image"] = $upload["error"];
+        }
+    }
+
+    if ($errors) {
+        return ["request" => $request, "input" => $input, "errors" => $errors];
+    }
+
+    $postData               = $input;
+    $postData["image_path"] = $upload["path"] ?? ($request["post_data"]["image_path"] ?? null);
+
+    if (!updatePostRequest($conn, $requestId, (int) $scout["id"], $postData)) {
+        $errors["form"] = "Request could not be updated. Please try again.";
+        return ["request" => $request, "input" => $input, "errors" => $errors];
+    }
+
+    $_SESSION["flash_success"] = "Request updated successfully.";
+    header("Location: my_requests.php");
+    exit;
+}
