@@ -62,3 +62,4 @@ function verifyLoginCredentials($conn, $email, $password)
         return false;
     }
     return $user;
+}
