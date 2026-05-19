@@ -9,7 +9,7 @@ function bootSession()
 }
 
 // Redirect helper.
-function goTo($path)
+function goToUrl($path)
 {
     header("Location: " . $path);
     exit;
@@ -20,7 +20,7 @@ function requireLogin()
 {
     bootSession();
     if (!isset($_SESSION["user_id"])) {
-        goTo("../auth/login.php");
+        goToUrl("../auth/login.php");
     }
 }
 
@@ -29,7 +29,7 @@ function requireGuest()
 {
     bootSession();
     if (isset($_SESSION["user_id"])) {
-        goTo("../home/index.php");
+        goToUrl("../home/index.php");
     }
 }
 
@@ -38,7 +38,7 @@ function requireVerifiedGeneralUser()
 {
     requireLogin();
     if (($_SESSION["role"] ?? "") !== "user" || (int) ($_SESSION["is_verified"] ?? 0) !== 1) {
-        goTo("../auth/access_denied.php");
+        goToUrl("../auth/access_denied.php");
     }
 }
 
@@ -66,11 +66,10 @@ function flashGet($key)
 function redirectByRole($role)
 {
     if ($role === "scout") {
-        goTo("../scout/dashboard.php");
+        goToUrl("../scout/dashboard.php");
     } elseif ($role === "admin") {
-        // Task 3 not built yet, send to home.
-        goTo("../home/index.php");
+        goToUrl("../home/index.php");
     } else {
-        goTo("../home/index.php");
+        goToUrl("../home/index.php");
     }
 }

@@ -14,6 +14,7 @@ CREATE TABLE users(
     ) NOT NULL,
     is_verified TINYINT(1) DEFAULT 0,
     profile_picture VARCHAR(255),
+    remember_token VARCHAR(255) DEFAULT NULL,
     created_at TIMESTAMP
     DEFAULT CURRENT_TIMESTAMP
 );
@@ -38,6 +39,25 @@ CREATE TABLE posts(
     ),
     created_at TIMESTAMP
     DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP
+    DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (scout_id)
+    REFERENCES users(id)
+    ON DELETE CASCADE
+);
+
+CREATE TABLE post_requests(
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    scout_id INT NOT NULL,
+    post_data JSON NOT NULL,
+    requested_at TIMESTAMP
+    DEFAULT CURRENT_TIMESTAMP,
+    status ENUM(
+        'pending',
+        'approved',
+        'rejected'
+    ) NOT NULL DEFAULT 'pending',
 
     FOREIGN KEY (scout_id)
     REFERENCES users(id)
@@ -67,11 +87,19 @@ INSERT INTO users(
     role,
     is_verified
 )
-VALUES(
+VALUES
+(
     'Admin',
     'admin@travel.com',
-    '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/.V3Dbpr9Fqvle',
+    '$2y$10$ulv2DIY2qG52K6SjMXqPLeYJJwIKn4rmF6LhJ4kV5ILW3JqY3iDSC',
     'admin',
+    1
+),
+(
+    'Test Scout',
+    'scout@travel.com',
+    '$2y$10$ulv2DIY2qG52K6SjMXqPLeYJJwIKn4rmF6LhJ4kV5ILW3JqY3iDSC',
+    'scout',
     1
 );
 
@@ -87,21 +115,21 @@ INSERT INTO posts(
 )
 VALUES
 (
-    1,
+    2,
     'Coxs Bazar',
     'Longest Sea Beach In The World',
     'Bangladesh',
-    'Beach',
+    'beach',
     'medium',
     'Bus, Flight',
     'approved'
 ),
 (
-    1,
+    2,
     'Sajek Valley',
     'Beautiful Hill Area',
     'Bangladesh',
-    'Mountain',
+    'mountain',
     'low',
     'Bus, Jeep',
     'approved'
