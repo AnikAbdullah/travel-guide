@@ -21,6 +21,16 @@ body {
   line-height: 1.7;
   min-height: 100vh;
   font-size: 15px;
+  display: flex;
+  flex-direction: column;
+}
+
+main.container {
+  flex: 1 0 auto;
+}
+
+.site-footer {
+  flex-shrink: 0;
 }
 
 a { text-decoration: none; color: inherit; }
