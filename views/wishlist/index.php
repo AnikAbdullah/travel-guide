@@ -1,90 +1,109 @@
 <?php
 
-session_start();
+require_once "../../config/db.php";
+require_once "../../controllers/WishlistController.php";
+require_once "../../helpers/auth.php";
 
-require_once '../../config/database.php';
-require_once '../../models/Wishlist.php';
+bootSession();
 
-$db = (new Database())->connect();
+requireVerifiedGeneralUser();
 
-$wishlist = new Wishlist($db);
+function e($value)
+{
+    return htmlspecialchars($value ?? "");
+}
 
-$items = $wishlist->getWishlist(
-    $_SESSION['user_id']
-);
+if (empty($_SESSION["csrf_token"])) {
+    $_SESSION["csrf_token"] = bin2hex(random_bytes(32));
+}
+
+$csrfToken = $_SESSION["csrf_token"];
+
+$wishlistItems = handleWishlistPage($conn);
 
 ?>
-
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
 
-<title>Wishlist</title>
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
 
-<link
-rel="stylesheet"
-href="../../public/css/style.css"
->
+    <title>Wishlist | Travel Guide</title>
 
+    <link rel="stylesheet"
+          href="../../public/css/auth.css">
+
+    <script>
+        window.CSRF_TOKEN = "<?= e($csrfToken) ?>";
+    </script>
 </head>
 <body>
 
-<?php include '../partials/navbar.php'; ?>
+<?php require_once "../partials/navbar.php"; ?>
 
-<h2>My Wishlist</h2>
+<main class="home-container">
 
-<?php if(count($items) > 0): ?>
+    <h2>My Wishlist</h2>
 
-<?php foreach($items as $item): ?>
+    <?php if (empty($wishlistItems)): ?>
 
-<div class="card">
+        <div class="alert alert-info">
+            Your wishlist is empty.
+        </div>
 
-<h3>
-<?php echo $item['title']; ?>
-</h3>
+    <?php else: ?>
 
-<p>
-Country:
-<?php echo $item['country']; ?>
-</p>
+        <table class="wishlist-table">
 
-<p>
-Genre:
-<?php echo $item['genre']; ?>
-</p>
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Country</th>
+                    <th>Genre</th>
+                    <th>Cost</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
 
-<p>
-Cost:
-<?php echo $item['cost_level']; ?>
-</p>
+            <tbody>
 
-<button
-onclick="removeWishlist(
-<?php echo $item['id']; ?>
-)"
->
-Remove
-</button>
+                <?php foreach ($wishlistItems as $item): ?>
 
-</div>
+                    <tr id="wishlist-row-<?= e($item["id"]) ?>">
 
-<?php endforeach; ?>
+                        <td><?= e($item["title"]) ?></td>
 
-<?php else: ?>
+                        <td><?= e($item["country"]) ?></td>
 
-<div class="card">
+                        <td><?= e($item["genre"]) ?></td>
 
-<p>
-No Wishlist Added Yet
-</p>
+                        <td><?= e($item["cost_level"]) ?></td>
 
-</div>
+                        <td>
 
-<?php endif; ?>
+                            <button
+                                onclick="removeWishlistItem(<?= e($item["id"]) ?>)"
+                            >
+                                Remove
+                            </button>
 
-<script
-src="../../public/js/wishlist.js"
-></script>
+                        </td>
+
+                    </tr>
+
+                <?php endforeach; ?>
+
+            </tbody>
+
+        </table>
+
+    <?php endif; ?>
+
+</main>
+
+<script src="../../public/js/wishlist.js"></script>
 
 </body>
 </html>
