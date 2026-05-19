@@ -1,92 +1,64 @@
-(function () {
-  "use strict";
+// Show field error.
+function showAuthError(field, message) {
+  var el = document.getElementById(field + "_error");
+  if (el) el.innerHTML = message;
+}
 
-  function showError(fieldName, message) {
-    var el = document.querySelector('[data-error-for="' + fieldName + '"]');
-    if (el) {
-      el.textContent = message;
-    }
+// Validate login form.
+function validateLoginForm() {
+  var form = document.forms["loginForm"];
+  var ok = true;
+
+  if (form["email"].value.trim() === "") {
+    showAuthError("email", "Email is required.");
+    ok = false;
+  } else {
+    showAuthError("email", "");
   }
 
-  function clearErrors(form) {
-    form.querySelectorAll("[data-error-for]").forEach(function (el) {
-      el.textContent = "";
-    });
+  if (form["password"].value === "" || form["password"].value.length < 8) {
+    showAuthError("password", "Password must be at least 8 characters.");
+    ok = false;
+  } else {
+    showAuthError("password", "");
   }
 
-  function isValidEmail(email) {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  return ok;
+}
+
+// Validate registration form.
+function validateRegisterForm() {
+  var form = document.forms["registerForm"];
+  var ok = true;
+
+  if (form["name"].value.trim() === "") {
+    showAuthError("name", "Name is required.");
+    ok = false;
+  } else {
+    showAuthError("name", "");
   }
 
-  var registerForm = document.getElementById("registerForm");
-  if (registerForm) {
-    registerForm.addEventListener("submit", function (event) {
-      clearErrors(registerForm);
-      var valid = true;
-      var name = registerForm.name.value.trim();
-      var email = registerForm.email.value.trim();
-      var password = registerForm.password.value;
-      var confirmPassword = registerForm.confirm_password.value;
-
-      if (!name) {
-        showError("name", "Name is required.");
-        valid = false;
-      }
-
-      if (!email) {
-        showError("email", "Email is required.");
-        valid = false;
-      } else if (!isValidEmail(email)) {
-        showError("email", "Enter a valid email address.");
-        valid = false;
-      }
-
-      if (!password) {
-        showError("password", "Password is required.");
-        valid = false;
-      } else if (password.length < 8) {
-        showError("password", "Password must be at least 8 characters.");
-        valid = false;
-      }
-
-      if (!confirmPassword) {
-        showError("confirm_password", "Please confirm your password.");
-        valid = false;
-      } else if (password !== confirmPassword) {
-        showError("confirm_password", "Passwords do not match.");
-        valid = false;
-      }
-
-      if (!valid) {
-        event.preventDefault();
-      }
-    });
+  var emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailPattern.test(form["email"].value.trim())) {
+    showAuthError("email", "A valid email is required.");
+    ok = false;
+  } else {
+    showAuthError("email", "");
   }
 
-  var loginForm = document.getElementById("loginForm");
-  if (loginForm) {
-    loginForm.addEventListener("submit", function (event) {
-      clearErrors(loginForm);
-      var valid = true;
-      var email = loginForm.email.value.trim();
-      var password = loginForm.password.value;
-
-      if (!email) {
-        showError("email", "Email is required.");
-        valid = false;
-      } else if (!isValidEmail(email)) {
-        showError("email", "Enter a valid email address.");
-        valid = false;
-      }
-
-      if (!password) {
-        showError("password", "Password is required.");
-        valid = false;
-      }
-
-      if (!valid) {
-        event.preventDefault();
-      }
-    });
+  if (form["password"].value.length < 8) {
+    showAuthError("password", "Password must be at least 8 characters.");
+    ok = false;
+  } else {
+    showAuthError("password", "");
   }
-})();
+
+  if (form["password"].value !== form["confirm_password"].value) {
+    showAuthError("confirm_password", "Passwords do not match.");
+    ok = false;
+  } else {
+    showAuthError("confirm_password", "");
+  }
+
+  return ok;
+}
